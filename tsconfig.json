@@ -4,6 +4,7 @@
        "noImplicitAny": true,
        "removeComments": true,
        "sourceMap": true
+       , "outDir": "compiled/"
    },
    "include": ["src/**/*"]
    , "exclude": ["node_modules", "compiled"]

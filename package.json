@@ -10,8 +10,14 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/jest": "^25.2.3",
     "@types/node": "^14.0.5",
-    "tsc": "^1.20150623.0",
+    "jest": "^26.0.1",
+    "ts-jest": "^26.0.0",
     "typescript": "^3.9.3"
+  },
+  "dependencies": {
+    "@google-cloud/text-to-speech": "^2.3.0",
+    "@google-cloud/translate": "^5.3.0"
   }
 }
