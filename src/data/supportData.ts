@@ -23,7 +23,7 @@ This app will accept a series of sentences, and output matching subfolders.
 All audio files are saved in .ogg format.
 `
 
- 
+
 
 
 export type instructionsType = {
