@@ -1,38 +1,22 @@
 
 // --------------- Prompt
 
-export const pressEnter = "Press Enter to continue...";
 
 // --------------- Instruction Text
 
-const instructionHeader = `
-******************************************
-    FOREIGN SENTENCE AUDIO TRANSLATOR 
-******************************************
-`
+const overview = `
+1. This app will accept a series of sentences, and output subfolders matching the sentence. 
 
-const instructionAppDescription = `
-This app will accept a series of sentences, and output matching subfolders. 
+2. Each subfolder will have audio files that speak the sentence in English. 
 
-1. Each subfolder will speak the sentence in English, then the foreign language version of the sentence X number of times (X is user defined).
+3. Then the foreign language version of the sentence will be spoken X number of times (X is user defined).
 
-2. Each word in the sentence will then be stated once in English, then X number of times as well, to build familiarity and repetition at the phrase/sentence level, and also understanding at the individual word level.
+4. Each word in the sentence will then be stated once in English, then X number of times as well.
 
-3. Finally, step 1 will repeat again, saying the entire sentence or phrase in English, then repeating it in the foreign language X times.
+5. Finally, the full sentence will repeat again, in English and then X number of times in the foreign language
 
 All audio files are saved in .ogg format.
+
+Next: Begin the wizard.
 `
 
-
-
-
-export type instructionsType = {
-   header: string
-   , description: string
-}
-
-export const instructions: instructionsType = {
-   header : instructionHeader
-   , description : instructionAppDescription
-   
-}

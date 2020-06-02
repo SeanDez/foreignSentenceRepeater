@@ -24,12 +24,10 @@ export default class ArgumentParser {
       const arg1 = this.commandLineArgs[2];
 
       switch (arg1) {
-         case "-i":
-         case "--information": 
          case undefined: {
-            console.log("this is the i/undefined case.")
-            console.log('arg1', arg1);
-            console.log('instructions', this.instructions.description);
+            
+            // run wizard
+
             break;
          }
 
