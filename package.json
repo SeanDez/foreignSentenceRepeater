@@ -1,23 +1,33 @@
 {
-  "name": "foreignSentenceRepeater",
+  "name": "foreign_sentence_repeater",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "compiled/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@babel/core": "^7.10.2",
+    "@babel/preset-env": "^7.10.2",
+    "@babel/preset-typescript": "^7.10.1",
     "@types/jest": "^25.2.3",
     "@types/node": "^14.0.5",
+    "@types/readline-sync": "^1.4.3",
+    "babel-jest": "^26.0.1",
     "jest": "^26.0.1",
     "ts-jest": "^26.0.0",
     "typescript": "^3.9.3"
   },
   "dependencies": {
     "@google-cloud/text-to-speech": "^2.3.0",
-    "@google-cloud/translate": "^5.3.0"
+    "@google-cloud/translate": "^5.3.0",
+    "readline-sync": "^1.4.10"
+  },
+  "jest" : {
+    "preset" : "ts-jest"
+    , "modulePathIgnorePatterns" : ["compiled"]
   }
 }

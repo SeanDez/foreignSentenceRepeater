@@ -1,14 +1,11 @@
-import { instructions, pressEnter, instructionsType } from "../data/supportData";
-
-
+import SetupWizard from "./setupWizard/SetupWizard";
+import Overview from "./setupWizard/Overview";
 
 export default class ArgumentParser {
    protected commandLineArgs: string[];
-   protected instructions: instructionsType;
 
    constructor(argV: string[]) {
       this.commandLineArgs = argV;
-      this.instructions = instructions
    }
 
    // ---------------  Public Methods
@@ -24,16 +21,16 @@ export default class ArgumentParser {
       const arg1 = this.commandLineArgs[2];
 
       switch (arg1) {
-         case undefined: {
-            
-            // run wizard
-
-            break;
-         }
-
          case "-c":
          case "--configure": {
 
+            // run setup wizard
+            const setupWizard = new SetupWizard([
+               new Overview()
+            ])
+            const configData = setupWizard.run();
+            // todo reinstate this when all steps complete
+            // setupWizard.save(configData);
             break;
          }
 
@@ -43,12 +40,15 @@ export default class ArgumentParser {
             break;
          }
 
+         // It is expected that this case also catches undefined
          default: {
-            // todo check for a sentence string
-            // else respond: false argument
+            console.log(
+`Please run this script with the -c or --configure flag to configure your project using the setup wizard. 
+
+Or use the -b or --build flag to build the audio files and subfolders
+            
+`);
          }
       }
-
-      // todo if no flag, test for a phrase/sentence
    }
 }

@@ -1,22 +1,13 @@
 export default abstract class StepsBase {
+    public hasSaveableData: boolean = false;
+
    public header: string = `
-   ******************************************
-       FOREIGN SENTENCE AUDIO TRANSLATOR 
-   ******************************************
+******************************************
+    FOREIGN SENTENCE AUDIO TRANSLATOR 
+******************************************
+`;
+
+   protected prompt: string = `Press any key to continue...
    `;
-
-   constructor() {
-      
-   }
-
-   // --------------- Defaults
-
-   public prompt() {
-      console.log(`
-
-      Press Enter to continue...
-      
-      `);
-   }
 
 }

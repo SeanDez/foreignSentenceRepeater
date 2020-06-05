@@ -5,6 +5,7 @@
        "removeComments": true,
        "sourceMap": true
        , "outDir": "compiled/"
+       , "esModuleInterop": true
    },
    "include": ["src/**/*"]
    , "exclude": ["node_modules", "compiled"]
