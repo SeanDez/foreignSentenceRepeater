@@ -30,7 +30,7 @@ test("SetupRole", () => {
 
    /**** Teardown ****/
    try {
-      fs.unlinkSync(dummyFile)
+      fs.unlinkSync(fullFilePath)
    }
    catch(error) { console.log("error: ", error); }
-})
+});
