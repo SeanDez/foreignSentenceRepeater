@@ -2,10 +2,12 @@ import WizardSteps from "./WizardStepsInterface";
 import StepsBase from "./StepsBase";
 import readLine from "readline-sync";
 import fs from "fs";
+import path from "path";
 
 export default class SetupRole extends StepsBase implements WizardSteps {
-
-   private description: string = `To use this app, you will need a Google Cloud account. 
+   public needsFileValidation: boolean = true;
+   
+   private readonly description: string = `To use this app, you will need a Google Cloud account. 
    
 1. Sign up on this page: cloud.google.com/gcp/
    
@@ -14,17 +16,47 @@ export default class SetupRole extends StepsBase implements WizardSteps {
 3. Save the key file to the project root as googleCredentials.json. Make sure spelling is exact, including the capital C! 
 `
 
-   protected prompt: string = `Once you have saved the key file as googleCredentials.json, press any key to validate your file is present and continue...
+   public readonly promptMessage: string = `Press any key to verify that your googleCredentials.json file is present and continue...
    `
+
+   private readonly validationFailedMessage: string = `credentials file not found in project root...`
+
+   /**** Duck Typed methods ****/
 
    public explain() {
       console.log(this.description);
-      console.log(this.prompt);
    }
 
-   /* checks for existing google credentials file 
-   */
-   public validate(filePath = "../../../googleCredentials.json"): boolean {
+   public prompt(): string {
+      console.log(this.promptMessage);
+      return readLine.keyIn();
+   }
+
+   public validateFile(): void {
+      while (true) {
+         const fileExists: boolean = this.checkForCredentialsFile();
+
+         if (fileExists) {
+            return; // the only exit path
+         } else {
+            console.log(this.validationFailedMessage);
+            
+            // ask them to fix the issue again before the loop resets and does another check
+            this.prompt(); 
+         }
+      }
+   }
+
+
+   /**** Workers ****/
+
+  protected checkForCredentialsFile(
+     filePath = path.join(__dirname, "../../../googleCredentials.json"))
+     : boolean {
+      console.log('__dirname', __dirname);
+      console.log('filePath', filePath);
+
       return fs.existsSync(filePath);
    }
+
 }

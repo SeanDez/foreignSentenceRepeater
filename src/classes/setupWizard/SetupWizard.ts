@@ -1,4 +1,5 @@
 import WizardSteps from "./WizardStepsInterface";
+import ConfigData from "./ConfigDataInterface";
 import fs from "fs";
 import path from "path";
 
@@ -13,7 +14,7 @@ import path from "path";
    todo Have this code reviewed
 */
 export default class SetupWizard {
-   protected steps: Array<WizardSteps>;
+   private steps: Array<WizardSteps>;
    
    constructor(allSteps: Array<WizardSteps>) {
       this.steps = allSteps;
@@ -24,34 +25,41 @@ export default class SetupWizard {
    /* Handle looping of the step logic
       Each step will explain. Some will validate input
    */
-   run() {
+   run(): ConfigData {
+      const configData = this.steps.reduce((accumulator: Partial<ConfigData>, currentStepInstance: WizardSteps): Partial<ConfigData> => {
+         // instruct and ask for feedback
+         currentStepInstance.explain();
 
-      const configData = {};
+         // loop until a valid input is returned
+         // exitChars are valid inputs and also handled
+         const validatedUserInput: string = this.getValidInput(currentStepInstance);
 
-      this.steps.forEach(async configStep => {
-         // capture the answer
-         const rawUserResponse: string|void = await configStep.explain();
-
-         // if a string was returned, validate and save
-         if (typeof rawUserResponse === "string") {
-            const isValidated: boolean|void = configStep.validate(rawUserResponse);
-            
-            if (isValidated && configStep.hasSaveableData) { 
-               // convert to kv pair
-               const formattedForConfiguration = configStep.format(rawUserResponse);
-
-               // save to local object
-               Object.assign(configData, formattedForConfiguration);
-            }
+         // blocks until valid file is found, on file validation steps
+         if (currentStepInstance.needsFileValidation) {
+            currentStepInstance.validateFile();
          }
-      })
+
+
+
+         // return a k/v pair for steps with important inputs
+         if (currentStepInstance.hasSaveableData) {
+            return {
+               [currentStepInstance.configDataKey] : validatedUserInput
+            };
+         } else {
+            currentStepInstance.prompt();
+         }
+      }, {}) as ConfigData; // assert the method return type
 
       return configData;
    }
+   
+
+   // --------------- Helper methods
 
    /* create and add data to the config file
    */
-   save(configFileData: {
+   private save(configFileData: {
       languageCode : string
       , numberOfRepeats : string
    }): void {
@@ -67,6 +75,31 @@ export default class SetupWizard {
          }
       );
    }
+
+   // need also, data to tell if the wizard has returnable data
+   
+   /* Main function is to loop until an input is deemed valid
+      Validator contained in the object itself, accesed via duck typing
+   */
+   private getValidInput(configStep: WizardSteps): string {
+      let continueLooping = true;
+
+      while (continueLooping === true) {
+         const rawInput: string = configStep.prompt();
+         const inputIsValid: boolean = configStep.validateInput(rawInput);
+
+         if (inputIsValid) {
+            continueLooping = false;
+            return rawInput;
+         } else {
+            console.log(configStep.invalidInputMessage)
+         }
+      }
+   }
+
+   /* 0 is a success exit code
+   */
+   private exit() { process.exit(0); }
 
 
 }

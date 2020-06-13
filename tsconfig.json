@@ -1,5 +1,6 @@
 {
    "compilerOptions": {
+       "target" : "ES5",
        "module": "commonjs",
        "noImplicitAny": true,
        "removeComments": true,
@@ -8,5 +9,5 @@
        , "esModuleInterop": true
    },
    "include": ["src/**/*"]
-   , "exclude": ["node_modules", "compiled"]
+   , "exclude": ["node_modules", "compiled", "__tests__"]
 }

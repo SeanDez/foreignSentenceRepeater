@@ -3,10 +3,9 @@ import WizardSteps from "./WizardStepsInterface";
 import readLine from "readline-sync";
 
 export default class Overview extends StepsBase implements WizardSteps {
-   public prompt: string = `Ready to setup your project? Press any key to begin the setup wizard (You may exit at any time with CTRL+V).
-   `;
+   public readonly hasSaveableData: boolean = false;
 
-   public description: string = `OVERVIEW
+   public readonly description: string = `OVERVIEW
 
 This app will accept a series of sentences, and output subfolders matching the sentence. 
 
@@ -21,16 +20,22 @@ This app will accept a series of sentences, and output subfolders matching the s
 All audio files are saved in .ogg format.
 `;
 
+   public readonly promptMessage: string = `Ready to setup your project? Press any key to begin the setup wizard (You may exit at any time with CTRL+C).
+   `;
+
    constructor() {
       super()
    }
 
+   /**** Duck Typed Methods ****/
+
    public explain(): void {
       console.log(this.header);
       console.log(this.description);
+   }
 
-      // the answer is discarded
-      readLine.keyIn(this.prompt);
+   public prompt() {
+      return readLine.keyIn(this.promptMessage);
    }
 
 }

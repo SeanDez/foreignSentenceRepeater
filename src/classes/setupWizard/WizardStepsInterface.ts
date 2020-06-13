@@ -2,7 +2,21 @@
 */
 export default interface WizardSteps {
    hasSaveableData: boolean
+   , needsFileValidation: boolean
+   , readonly invalidInputMessage?: string
+   , readonly configDataKey?: string
+   , readonly promptMessage?: string
    , explain(): string|void
-   , validate?(userResponse?: string): boolean|void
-   , format?(userResponse: string): boolean|void
+   , prompt(): string
+   , validateInput(userInput?: string): boolean
+   , validateFile?(filePath?: string): boolean|void
+   , format?(userInput: string): boolean|void
 }
+
+
+
+
+
+
+
+
