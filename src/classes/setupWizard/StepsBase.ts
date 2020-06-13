@@ -19,7 +19,7 @@ export default abstract class StepsBase {
     /**** Duck Typed Methods ****/
 
     public prompt() {
-       return readLine.keyIn();
+       return readLine.question(this.promptMessage);
     }
 
     /* Does only a basic exit check
@@ -34,17 +34,13 @@ export default abstract class StepsBase {
 
     /**** Helpers ****/
 
-    /* THIS METHOD OVERWRIDES ALL .keyIn() INPUTS THAT START WITH Q (or the passed argument)
-        
-    No language code interferes
-    https://cloud.google.com/translate/docs/languages
-
-    .prompt and .question are also compatible
-    */
-    public exitCheck(userInput: string, exitChar: string = "q") {
+    public exitCheck(userInput: string) {
         const normalizedUserInput = userInput.trim().toLowerCase();
+        enum exitCodes { exit = "exit", quit = "quit" }
 
-        if (normalizedUserInput === exitChar) {
+        if (normalizedUserInput === exitCodes.exit ||
+            normalizedUserInput === exitCodes.quit
+            ) {
             process.exit();
         }
     }

@@ -5,7 +5,10 @@ import readLine from "readline-sync";
 export default class Overview extends StepsBase implements WizardSteps {
    public readonly hasSaveableData: boolean = false;
 
-   public readonly description: string = `OVERVIEW
+   public readonly description: string = `
+***********************************   
+             OVERVIEW
+***********************************
 
 This app will accept a series of sentences, and output subfolders matching the sentence. 
 
@@ -20,7 +23,7 @@ This app will accept a series of sentences, and output subfolders matching the s
 All audio files are saved in .ogg format.
 `;
 
-   public readonly promptMessage: string = `Ready to setup your project? Press any key to begin the setup wizard (You may exit at any time with CTRL+C).
+   public readonly promptMessage: string = `Ready to setup your project? Press ENTER to begin the setup wizard (You may exit at any time by typing "exit" or "quit").
    `;
 
    constructor() {
@@ -35,7 +38,7 @@ All audio files are saved in .ogg format.
    }
 
    public prompt() {
-      return readLine.keyIn(this.promptMessage);
+      return readLine.question(this.promptMessage);
    }
 
 }

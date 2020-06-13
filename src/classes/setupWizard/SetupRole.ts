@@ -7,7 +7,12 @@ import path from "path";
 export default class SetupRole extends StepsBase implements WizardSteps {
    public needsFileValidation: boolean = true;
    
-   private readonly description: string = `To use this app, you will need a Google Cloud account. 
+   private readonly description: string = `
+***********************************   
+      SETUP GOOGLE CLOUD ROLE
+***********************************
+
+To use this app, you will need a Google Cloud account. 
    
 1. Sign up on this page: cloud.google.com/gcp/
    
@@ -29,7 +34,7 @@ export default class SetupRole extends StepsBase implements WizardSteps {
 
    public prompt(): string {
       console.log(this.promptMessage);
-      return readLine.keyIn();
+      return readLine.question();
    }
 
    public validateFile(): void {
@@ -53,8 +58,6 @@ export default class SetupRole extends StepsBase implements WizardSteps {
   protected checkForCredentialsFile(
      filePath = path.join(__dirname, "../../../googleCredentials.json"))
      : boolean {
-      console.log('__dirname', __dirname);
-      console.log('filePath', filePath);
 
       return fs.existsSync(filePath);
    }

@@ -34,11 +34,11 @@ export default class SetupWizard {
          // exitChars are valid inputs and also handled
          const validatedUserInput: string = this.getValidInput(currentStepInstance);
 
+
          // blocks until valid file is found, on file validation steps
          if (currentStepInstance.needsFileValidation) {
             currentStepInstance.validateFile();
          }
-
 
 
          // return a k/v pair for steps with important inputs
@@ -46,9 +46,7 @@ export default class SetupWizard {
             return {
                [currentStepInstance.configDataKey] : validatedUserInput
             };
-         } else {
-            currentStepInstance.prompt();
-         }
+         } 
       }, {}) as ConfigData; // assert the method return type
 
       return configData;
@@ -96,10 +94,6 @@ export default class SetupWizard {
          }
       }
    }
-
-   /* 0 is a success exit code
-   */
-   private exit() { process.exit(0); }
 
 
 }
