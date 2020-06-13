@@ -1,29 +1,32 @@
 import SetupRole from "../SetupRole";
 import fs from "fs";
+import path from "path";
 
 class SetupRoleExposed extends SetupRole {
-   public checkForCredentialsFilePublic() {
-      return this.checkForCredentialsFile();
+   public checkForCredentialsFilePublic(filePath: string) {
+      return this.checkForCredentialsFile(filePath);
    }
 }
 
 test("SetupRole", () => {
    /**** Setup ****/
    const setupRole = new SetupRoleExposed();
-   const dummyFilePath = __dirname;
 
 
    /**** Execute & Assert ****/
 
    // non-existent file
-   const isFalse = setupRole.checkForCredentialsFilePublic();
-   expect(isFalse).toStrictEqual(false);
+   const badFilePath = path.join(__dirname, "noFile.bad")
+   const shouldBeFalse = setupRole.checkForCredentialsFilePublic(badFilePath);
+   expect(shouldBeFalse).toStrictEqual(false);
 
-   // actual file
+   // actual file check
    const dummyFile = "./dummyFile.json";
-   fs.writeFileSync(dummyFile, "");
-   const isTrue = setupRole.checkForCredentialsFilePublic();
-   expect(isTrue).toStrictEqual(true);
+   const fullFilePath = path.join(__dirname, dummyFile);
+   fs.writeFileSync(fullFilePath, "");
+
+   const shouldBeTrue = setupRole.checkForCredentialsFilePublic(fullFilePath);
+   expect(shouldBeTrue).toStrictEqual(true);
 
    /**** Teardown ****/
    try {
