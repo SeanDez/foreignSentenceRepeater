@@ -84,6 +84,10 @@ export default class SetupWizard {
 
       while (continueLooping === true) {
          const rawInput: string = configStep.prompt();
+
+         // check for an exit value
+         this.exitCheck(rawInput);
+
          const inputIsValid: boolean = configStep.validateInput(rawInput);
 
          if (inputIsValid) {
@@ -94,6 +98,17 @@ export default class SetupWizard {
          }
       }
    }
+
+   public exitCheck(userInput: string) {
+      const normalizedUserInput = userInput.trim().toLowerCase();
+      enum exitCodes { exit = "exit", quit = "quit" }
+
+      if (normalizedUserInput === exitCodes.exit ||
+          normalizedUserInput === exitCodes.quit
+          ) {
+          process.exit();
+      }
+  }
 
 
 }

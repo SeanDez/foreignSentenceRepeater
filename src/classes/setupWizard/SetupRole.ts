@@ -7,7 +7,7 @@ import path from "path";
 export default class SetupRole extends StepsBase implements WizardSteps {
    public needsFileValidation: boolean = true;
    
-   private readonly description: string = `
+   protected readonly description: string = `
 ***********************************   
       SETUP GOOGLE CLOUD ROLE
 ***********************************
@@ -24,7 +24,7 @@ To use this app, you will need a Google Cloud account.
    public readonly promptMessage: string = `Press any key to verify that your googleCredentials.json file is present and continue...
    `
 
-   private readonly validationFailedMessage: string = `credentials file not found in project root...`
+   private readonly validationFailedMessage: string = `Credentials file not found in project root...`
 
    /**** Duck Typed methods ****/
 

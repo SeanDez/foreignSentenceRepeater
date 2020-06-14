@@ -3,6 +3,7 @@ import readLine from "readline-sync";
 export default abstract class StepsBase {
     public hasSaveableData: boolean = false;
     public needsFileValidation: boolean = false;
+    protected description: string = ``;
 
     protected readonly header: string = `
 ******************************************
@@ -13,10 +14,14 @@ export default abstract class StepsBase {
     protected readonly promptMessage: string = `Press any key to continue...
 `;
 
-
-    /**** Constructor ****/
     
-    /**** Duck Typed Methods ****/
+    /**** Duck Typed DEFAULT Methods ****/
+
+    public explain() {
+        if (this.description) {
+            console.log(this.description);
+        }
+    }
 
     public prompt() {
        return readLine.question(this.promptMessage);
@@ -25,8 +30,6 @@ export default abstract class StepsBase {
     /* Does only a basic exit check
     */
     public validateInput(rawUserInput: string): boolean {
-        this.exitCheck(rawUserInput);
-
         // if not exited
         return true;
     }
@@ -34,15 +37,6 @@ export default abstract class StepsBase {
 
     /**** Helpers ****/
 
-    public exitCheck(userInput: string) {
-        const normalizedUserInput = userInput.trim().toLowerCase();
-        enum exitCodes { exit = "exit", quit = "quit" }
 
-        if (normalizedUserInput === exitCodes.exit ||
-            normalizedUserInput === exitCodes.quit
-            ) {
-            process.exit();
-        }
-    }
 
 }

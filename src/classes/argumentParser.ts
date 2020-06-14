@@ -1,7 +1,10 @@
 import ConfigData from "./setupWizard/ConfigDataInterface";
 import SetupWizard from "./setupWizard/SetupWizard";
+
+// step instances
 import Overview from "./setupWizard/Overview";
 import SetupRole from "./setupWizard/SetupRole";
+import EnableApis from "./setupWizard/EnableApis";
 
 export default class ArgumentParser {
    protected commandLineArgs: string[];
@@ -28,8 +31,9 @@ export default class ArgumentParser {
 
             // run setup wizard
             const setupWizard: InstanceType<typeof SetupWizard>= new SetupWizard([
-               new Overview(),
-               new SetupRole
+               new Overview()
+               , new SetupRole()
+               , new EnableApis()
             ])
             const configData: ConfigData = setupWizard.run();
             // todo reinstate this when all steps complete

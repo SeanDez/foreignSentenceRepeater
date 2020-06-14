@@ -5,7 +5,7 @@ import readLine from "readline-sync";
 export default class Overview extends StepsBase implements WizardSteps {
    public readonly hasSaveableData: boolean = false;
 
-   public readonly description: string = `
+   protected readonly description: string = `
 ***********************************   
              OVERVIEW
 ***********************************
