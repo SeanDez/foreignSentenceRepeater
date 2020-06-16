@@ -15,9 +15,11 @@ import path from "path";
 */
 export default class SetupWizard {
    private steps: Array<WizardSteps>;
+   private sentenceFilePath: string;
    
    constructor(allSteps: Array<WizardSteps>) {
       this.steps = allSteps;
+      this.sentenceFilePath = path.join(__dirname, "../../../sentences.json");
    }
 
    // duck type the checkers
@@ -25,8 +27,10 @@ export default class SetupWizard {
    /* Handle looping of the step logic
       Each step will explain. Some will validate input
    */
-   run(): ConfigData {
-      const configData = this.steps.reduce((accumulator: Partial<ConfigData>, currentStepInstance: WizardSteps): Partial<ConfigData> => {
+   public run(): void {
+      // run all steps. Compile into config object
+      const configData = this.steps.reduce(
+         (accumulator: Partial<ConfigData>, currentStepInstance: WizardSteps): Partial<ConfigData> => {
          // instruct and ask for feedback
          currentStepInstance.explain();
 
@@ -34,12 +38,10 @@ export default class SetupWizard {
          // exitChars are valid inputs and also handled
          const validatedUserInput: string = this.getValidInput(currentStepInstance);
 
-
          // blocks until valid file is found, on file validation steps
          if (currentStepInstance.needsFileValidation) {
             currentStepInstance.validateFile();
          }
-
 
          // return a k/v pair for steps with important inputs
          if (currentStepInstance.hasSaveableData) {
@@ -47,31 +49,41 @@ export default class SetupWizard {
                [currentStepInstance.configDataKey] : validatedUserInput
             };
          } 
-      }, {}) as ConfigData; // assert the method return type
+      }, {}) as ConfigData; // assert return type on .reduce()
 
-      return configData;
+      // save
+      // no check is needed. Intentionally overwrites any current config
+      this.save(configData);
+
+      // create sentence file (if it doesn't already exist)
+      this.createSentenceFile();
    }
+
    
 
    // --------------- Helper methods
 
    /* create and add data to the config file
    */
-   private save(configFileData: {
-      languageCode : string
-      , numberOfRepeats : string
-   }): void {
+   private save(
+      configFileData: ConfigData
+      , filePath: string = path.join(__dirname, "../../../configuration.json")
+      ): void {
       // __dirname will be transpiled to the current directory
       fs.writeFile(
-         path.join(__dirname, "../../../configuration.json")
+         filePath
          , JSON.stringify(configFileData)
          , "utf8"
          , error => {
             if (error) {
                console.log(error);
+               return;
             }
          }
       );
+
+      // assumed successful
+      console.log("Your configuration has been saved to \"configuration.json\" in the project root");
    }
 
    // need also, data to tell if the wizard has returnable data
@@ -110,5 +122,8 @@ export default class SetupWizard {
       }
   }
 
+  private createSentenceFile() {
+     fs.writeFileSync(this.sentenceFilePath, "Put all sentences (and phrases) to be translated here, one per line.");
+  }
 
 }

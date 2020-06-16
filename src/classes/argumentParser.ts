@@ -35,9 +35,7 @@ export default class ArgumentParser {
                , new SetupRole()
                , new EnableApis()
             ])
-            const configData: ConfigData = setupWizard.run();
-            // todo reinstate this when all steps complete
-            // setupWizard.save(configData);
+            setupWizard.run();
             break;
          }
 

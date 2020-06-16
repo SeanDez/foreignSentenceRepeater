@@ -7,7 +7,7 @@ export default class EnableApis extends StepsBase implements WizardSteps {
             Enable APIs
 ***********************************
 
-Please log into Google Cloud and select the project you just created in the prior step. The project can be selected in the topmost nav next to the Google Cloud logo (if it is not already chosen).
+For this step, you will need to log into Google Cloud and select the project you just created in the prior step. The project can be selected in the topmost nav bar, next to the Google Cloud logo (if it is not already chosen).
 
 The next step is to enable two APIs: Translation, and Text-to-Speech.
 
