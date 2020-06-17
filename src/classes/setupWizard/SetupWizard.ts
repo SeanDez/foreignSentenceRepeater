@@ -28,14 +28,14 @@ export default class SetupWizard {
       Each step will explain. Some will validate input
    */
    public run(): void {
-      // run all steps. Compile into config object
+      // run all steps. Compiles steps with returnable k/v pairs into a config object
       const configData = this.steps.reduce(
          (accumulator: Partial<ConfigData>, currentStepInstance: WizardSteps): Partial<ConfigData> => {
-         // instruct and ask for feedback
+         // instruct
          currentStepInstance.explain();
 
          // loop until a valid input is returned
-         // exitChars are valid inputs and also handled
+         // exit code is also handled
          const validatedUserInput: string = this.getValidInput(currentStepInstance);
 
          // blocks until valid file is found, on file validation steps
@@ -65,7 +65,7 @@ export default class SetupWizard {
 
    /* create and add data to the config file
    */
-   private save(
+   protected save(
       configFileData: ConfigData
       , filePath: string = path.join(__dirname, "../../../configuration.json")
       ): void {
@@ -91,7 +91,7 @@ export default class SetupWizard {
    /* Main function is to loop until an input is deemed valid
       Validator contained in the object itself, accesed via duck typing
    */
-   private getValidInput(configStep: WizardSteps): string {
+   protected getValidInput(configStep: WizardSteps): string {
       let continueLooping = true;
 
       while (continueLooping === true) {
@@ -122,7 +122,7 @@ export default class SetupWizard {
       }
   }
 
-  private createSentenceFile() {
+  protected createSentenceFile() {
      fs.writeFileSync(this.sentenceFilePath, "Put all sentences (and phrases) to be translated here, one per line.");
   }
 
