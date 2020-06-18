@@ -19,7 +19,7 @@ export default class SetupWizard {
    
    constructor(allSteps: Array<WizardSteps>) {
       this.steps = allSteps;
-      this.sentenceFilePath = path.join(__dirname, "../../../sentences.json");
+      this.sentenceFilePath = path.join(__dirname, "../../../sentences.txt");
    }
 
    // duck type the checkers
@@ -27,8 +27,14 @@ export default class SetupWizard {
    /* Handle looping of the step logic
       Each step will explain. Some will validate input
    */
-   public run(): void {
+   public run(): ConfigData {
       // run all steps. Compiles steps with returnable k/v pairs into a config object
+
+      // run one loop to handle the main steps
+
+      // run a 2nd loop to handle saving when necessary
+      // this is needed. The current logic isn't very clear
+
       const configData = this.steps.reduce(
          (accumulator: Partial<ConfigData>, currentStepInstance: WizardSteps): Partial<ConfigData> => {
          // instruct
@@ -51,21 +57,12 @@ export default class SetupWizard {
          } 
       }, {}) as ConfigData; // assert return type on .reduce()
 
-      // save
-      // no check is needed. Intentionally overwrites any current config
-      this.save(configData);
-
-      // create sentence file (if it doesn't already exist)
-      this.createSentenceFile();
+      return configData;
    }
-
-   
-
-   // --------------- Helper methods
 
    /* create and add data to the config file
    */
-   protected save(
+   public save(
       configFileData: ConfigData
       , filePath: string = path.join(__dirname, "../../../configuration.json")
       ): void {
@@ -86,10 +83,19 @@ export default class SetupWizard {
       console.log("Your configuration has been saved to \"configuration.json\" in the project root");
    }
 
-   // need also, data to tell if the wizard has returnable data
-   
+
+   public createSentenceFile() {
+      fs.writeFileSync(this.sentenceFilePath, "Put all sentences (and phrases) to be translated here, one per line.");
+      console.log("Your configuration has been saved to \"sentences.txt\" in the project root");
+
+   }
+
+
+   // --------------- Helper methods
+
+
    /* Main function is to loop until an input is deemed valid
-      Validator contained in the object itself, accesed via duck typing
+      Validator is contained in the object itself, accesed via duck typing
    */
    protected getValidInput(configStep: WizardSteps): string {
       let continueLooping = true;
@@ -122,8 +128,5 @@ export default class SetupWizard {
       }
   }
 
-  protected createSentenceFile() {
-     fs.writeFileSync(this.sentenceFilePath, "Put all sentences (and phrases) to be translated here, one per line.");
-  }
 
 }

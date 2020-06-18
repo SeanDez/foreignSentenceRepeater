@@ -59,18 +59,13 @@ test("validates input and ends loop", () => {
 });
 
 
-// testing only the public interface will reduce technical debt from testing each private internal
 
-// todo mock the file saving function
-// todo mock the prompt functions to auto-return a value
-// that is all that's needed. The dummy classes will do the rest
-describe("run()", () => {
-   test.skip("successful configData capture from reduce()", () => {
-
-   })
-
-   test.skip("successful save and sentence file build", () => {
-
-   });
+test.skip("successful configData capture from reduce()", () => {
 
 })
+
+
+test.skip("successful save and sentence file build", () => {
+
+});
+

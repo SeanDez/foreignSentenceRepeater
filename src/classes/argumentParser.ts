@@ -35,7 +35,11 @@ export default class ArgumentParser {
                , new SetupRole()
                , new EnableApis()
             ])
-            setupWizard.run();
+            
+            const configData = setupWizard.run();
+            setupWizard.save(configData);
+            setupWizard.createSentenceFile();
+
             break;
          }
 
