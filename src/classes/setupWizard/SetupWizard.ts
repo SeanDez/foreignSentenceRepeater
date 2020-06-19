@@ -14,26 +14,21 @@ import path from "path";
    todo Have this code reviewed
 */
 export default class SetupWizard {
+   // --------------- Properties
    private steps: Array<WizardSteps>;
-   private sentenceFilePath: string;
    
    constructor(allSteps: Array<WizardSteps>) {
       this.steps = allSteps;
-      this.sentenceFilePath = path.join(__dirname, "../../../sentences.txt");
    }
 
-   // duck type the checkers
+   
+   // --------------- Public Methods
  
    /* Handle looping of the step logic
       Each step will explain. Some will validate input
    */
-   public run(): ConfigData {
+   public initialSetup(): ConfigData {
       // run all steps. Compiles steps with returnable k/v pairs into a config object
-
-      // run one loop to handle the main steps
-
-      // run a 2nd loop to handle saving when necessary
-      // this is needed. The current logic isn't very clear
 
       const configData = this.steps.reduce(
          (accumulator: Partial<ConfigData>, currentStepInstance: WizardSteps): Partial<ConfigData> => {
@@ -52,7 +47,8 @@ export default class SetupWizard {
          // return a k/v pair for steps with important inputs
          if (currentStepInstance.hasSaveableData) {
             return {
-               [currentStepInstance.configDataKey] : validatedUserInput
+               ...accumulator
+               , [currentStepInstance.configDataKey] : validatedUserInput
             };
          } 
       }, {}) as ConfigData; // assert return type on .reduce()
@@ -60,41 +56,9 @@ export default class SetupWizard {
       return configData;
    }
 
-   /* create and add data to the config file
-   */
-   public save(
-      configFileData: ConfigData
-      , filePath: string = path.join(__dirname, "../../../configuration.json")
-      ): void {
-      // __dirname will be transpiled to the current directory
-      fs.writeFile(
-         filePath
-         , JSON.stringify(configFileData)
-         , "utf8"
-         , error => {
-            if (error) {
-               console.log(error);
-               return;
-            }
-         }
-      );
-
-      // assumed successful
-      console.log("Your configuration has been saved to \"configuration.json\" in the project root");
-   }
-
-
-   public createSentenceFile() {
-      fs.writeFileSync(
-         this.sentenceFilePath, 
-         "Put all sentences (and phrases) to be translated here, one per line.");
-      console.log("Your configuration has been saved to \"sentences.txt\" in the project root"
-      );
-   }
-
+   
 
    // --------------- Helper methods
-
 
    /* Main function is to loop until an input is deemed valid
       Validator is contained in the object itself, accesed via duck typing
@@ -119,7 +83,7 @@ export default class SetupWizard {
       }
    }
 
-   public exitCheck(userInput: string) {
+   private exitCheck(userInput: string) {
       const normalizedUserInput = userInput.trim().toLowerCase();
       enum exitCodes { exit = "exit", quit = "quit" }
 

@@ -20,10 +20,12 @@ export default abstract class StepsBase {
 
     public prompt() {
         if (this.promptMessage)
-       return readLine.question(this.promptMessage);
+       console.log(this.promptMessage);
+       return readLine.question();
     }
 
-    /* Does only a basic exit check
+    /* No validation 
+    exit code check handled one level higher    
     */
     public validateInput(rawUserInput: string): boolean {
         // if not exited

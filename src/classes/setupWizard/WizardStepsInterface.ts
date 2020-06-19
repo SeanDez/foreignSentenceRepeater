@@ -5,6 +5,7 @@ export default interface WizardSteps {
    , needsFileValidation: boolean
    , readonly invalidInputMessage?: string
    , readonly configDataKey?: string
+
    , explain(): void
    , prompt(): string
    , validateInput(userInput?: string): boolean

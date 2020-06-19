@@ -25,9 +25,11 @@ In this step you will set a global value of how many times the sentences and wor
 However, any value from 1 to ${this.maxRepeats} may be selected.
    `
 
-   public readonly promptMessage: string = `Enter the number of repeats you would like to use.`
+   public readonly promptMessage: string = `Enter the number of repeats you would like to use.
+   `
 
-   public readonly invalidInputMessage: string = `Invalid value. Please enter a value between 1 and ${this.maxRepeats}`;
+   public readonly invalidInputMessage: string = `Invalid value. Please enter a value between 1 and ${this.maxRepeats}
+   `;
 
 
    /**** Duck Typed methods ****/

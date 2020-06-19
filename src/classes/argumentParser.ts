@@ -1,11 +1,13 @@
 import ConfigData from "./setupWizard/ConfigDataInterface";
 import SetupWizard from "./setupWizard/SetupWizard";
+import SetupFinalizer from "./setupWizard/SetupFinalizer";
 
 // step instances
 import Overview from "./setupWizard/Overview";
 import SetupRole from "./setupWizard/SetupRole";
 import EnableApis from "./setupWizard/EnableApis";
 import SelectLanguage from "./setupWizard/SelectLanguage";
+import SelectRepeatCount from "./setupWizard/SelectRepeatCount";
 
 export default class ArgumentParser {
    protected commandLineArgs: string[];
@@ -36,13 +38,22 @@ export default class ArgumentParser {
                , new SetupRole()
                , new EnableApis()
                , new SelectLanguage()
-            ])
+               , new SelectRepeatCount()
+            ]);
             
             // instruct on google cloud setup, gather config data
-            const configData = setupWizard.run();
+            const configData = setupWizard.initialSetup();
 
-            setupWizard.save(configData);
-            setupWizard.createSentenceFile();
+            // save & create files
+            const setupFinalizer = new SetupFinalizer();
+            const successfulSave: boolean = setupFinalizer.save(configData);
+            const sentenceFileCreated: boolean = setupFinalizer.createSentenceFile();
+
+            // print final instructions
+            if (successfulSave && sentenceFileCreated) {
+               setupFinalizer.printFinalInstructions();
+            }
+
             break;
          }
 

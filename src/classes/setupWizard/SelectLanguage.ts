@@ -2,7 +2,8 @@ import WizardSteps from "./WizardStepsInterface";
 import StepsBase from "./StepsBase";
 
 export default class SelectLanguage extends StepsBase implements WizardSteps {
-   /**** Properties ****/
+   // --------------- Properties
+
    public readonly hasSaveableData: boolean = true;
    public readonly configDataKey: string = "languageCode";
 
@@ -20,7 +21,7 @@ export default class SelectLanguage extends StepsBase implements WizardSteps {
    public readonly promptMessage: string = `Please enter the language code of the target message exactly as shown, including any hyphens, and with matching letter casing:
    `
 
-   /**** Duck Typed Methods ****/
+   // --------------- Duck Typed Methods
 
    /* Always returns true. But gives a warning message if input is not found in the internal list (below)
    */
@@ -30,8 +31,9 @@ export default class SelectLanguage extends StepsBase implements WizardSteps {
       })
 
       if (matchFound === false) {
-         console.log(`The language code you entered was not found in this script's internal list. If the language was newly added, this is okay. If the build fails however, please check the language code you entered and update it directly inside configuration.json in the project root.
-         `);
+         console.log(`
+The language code you entered was not found in this script's internal list. If the language was newly added, this is okay. If the build fails however, please check the language code you entered and update it directly inside configuration.json in the project root.
+`);
       }
 
       return true;

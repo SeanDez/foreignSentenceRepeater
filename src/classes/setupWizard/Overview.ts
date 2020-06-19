@@ -25,7 +25,8 @@ All audio files are saved in .ogg format.
 `;
 
    public readonly promptMessage: string = `Ready to setup your project? Press ENTER to begin the setup wizard (You may exit at any time by typing "exit" or "quit").
-   `;
+   
+`;
 
 
    /**** Duck Typed Methods ****/
