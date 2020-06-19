@@ -85,9 +85,11 @@ export default class SetupWizard {
 
 
    public createSentenceFile() {
-      fs.writeFileSync(this.sentenceFilePath, "Put all sentences (and phrases) to be translated here, one per line.");
-      console.log("Your configuration has been saved to \"sentences.txt\" in the project root");
-
+      fs.writeFileSync(
+         this.sentenceFilePath, 
+         "Put all sentences (and phrases) to be translated here, one per line.");
+      console.log("Your configuration has been saved to \"sentences.txt\" in the project root"
+      );
    }
 
 

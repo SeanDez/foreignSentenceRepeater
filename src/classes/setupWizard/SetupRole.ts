@@ -5,14 +5,16 @@ import fs from "fs";
 import path from "path";
 
 export default class SetupRole extends StepsBase implements WizardSteps {
+   /**** Properties ****/
    public needsFileValidation: boolean = true;
    
-   protected readonly description: string = `
+   public readonly header: string = `
 ***********************************   
-      SETUP GOOGLE CLOUD ROLE
+     SETUP GOOGLE CLOUD ROLE
 ***********************************
+   `
 
-To use this app, you will need a Google Cloud account. 
+   protected readonly description: string = `To use this app, you will need a Google Cloud account. 
    
 1. Sign up on this page: cloud.google.com/gcp/
    
@@ -26,16 +28,8 @@ To use this app, you will need a Google Cloud account.
 
    private readonly validationFailedMessage: string = `Credentials file not found in project root...`
 
+
    /**** Duck Typed methods ****/
-
-   public explain() {
-      console.log(this.description);
-   }
-
-   public prompt(): string {
-      console.log(this.promptMessage);
-      return readLine.question();
-   }
 
    public validateFile(): void {
       while (true) {

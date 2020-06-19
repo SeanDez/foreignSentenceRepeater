@@ -26,8 +26,6 @@ Please go to the following pages and click the "Enable" button on each one:
 "enabled" (without quotes) was not entered.
 `;
 
-   constructor() { super(); }
-
    /**** Duck Typed Methods ****/
 
    public validateInput(rawUserInput: string): boolean {

@@ -3,6 +3,7 @@ import WizardSteps from "./WizardStepsInterface";
 import readLine from "readline-sync";
 
 export default class Overview extends StepsBase implements WizardSteps {
+   /**** Properties ****/
    public readonly hasSaveableData: boolean = false;
 
    protected readonly description: string = `
@@ -26,9 +27,6 @@ All audio files are saved in .ogg format.
    public readonly promptMessage: string = `Ready to setup your project? Press ENTER to begin the setup wizard (You may exit at any time by typing "exit" or "quit").
    `;
 
-   constructor() {
-      super()
-   }
 
    /**** Duck Typed Methods ****/
 

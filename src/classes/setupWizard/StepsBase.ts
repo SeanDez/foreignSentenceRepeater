@@ -1,29 +1,25 @@
 import readLine from "readline-sync";
 
 export default abstract class StepsBase {
+    /**** Properties ****/
     public hasSaveableData: boolean = false;
     public needsFileValidation: boolean = false;
-    protected description: string = ``;
 
-    protected readonly header: string = `
-******************************************
-    FOREIGN SENTENCE AUDIO TRANSLATOR 
-******************************************
-`;
-
-    protected readonly promptMessage: string = `Press any key to continue...
+    protected header: string;
+    protected description: string;
+    protected promptMessage: string = `Press any key to continue...
 `;
 
     
-    /**** Duck Typed DEFAULT Methods ****/
+    /**** Duck Typed Default Methods ****/
 
     public explain() {
-        if (this.description) {
-            console.log(this.description);
-        }
+        console.log(this.header); 
+        console.log(this.description);
     }
 
     public prompt() {
+        if (this.promptMessage)
        return readLine.question(this.promptMessage);
     }
 
@@ -33,10 +29,6 @@ export default abstract class StepsBase {
         // if not exited
         return true;
     }
-
-
-    /**** Helpers ****/
-
 
 
 }

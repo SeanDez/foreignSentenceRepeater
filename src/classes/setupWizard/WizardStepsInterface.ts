@@ -5,11 +5,10 @@ export default interface WizardSteps {
    , needsFileValidation: boolean
    , readonly invalidInputMessage?: string
    , readonly configDataKey?: string
-   , explain(): string|void
+   , explain(): void
    , prompt(): string
    , validateInput(userInput?: string): boolean
    , validateFile?(filePath?: string): boolean|void
-   , format?(userInput: string): boolean|void
 }
 
 

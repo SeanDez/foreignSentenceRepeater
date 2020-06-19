@@ -5,6 +5,7 @@ import SetupWizard from "./setupWizard/SetupWizard";
 import Overview from "./setupWizard/Overview";
 import SetupRole from "./setupWizard/SetupRole";
 import EnableApis from "./setupWizard/EnableApis";
+import SelectLanguage from "./setupWizard/SelectLanguage";
 
 export default class ArgumentParser {
    protected commandLineArgs: string[];
@@ -34,12 +35,14 @@ export default class ArgumentParser {
                new Overview()
                , new SetupRole()
                , new EnableApis()
+               , new SelectLanguage()
             ])
             
+            // instruct on google cloud setup, gather config data
             const configData = setupWizard.run();
+
             setupWizard.save(configData);
             setupWizard.createSentenceFile();
-
             break;
          }
 
