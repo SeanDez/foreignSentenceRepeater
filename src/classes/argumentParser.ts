@@ -3,7 +3,7 @@ import SetupWizard from "./setupWizard/SetupWizard";
 import SetupFinalizer from "./setupWizard/SetupFinalizer";
 
 // step instances
-import Overview from "./setupWizard/Overview";
+import ConfigOverview from "./setupWizard/ConfigOverview";
 import SetupRole from "./setupWizard/SetupRole";
 import EnableApis from "./setupWizard/EnableApis";
 import SelectLanguage from "./setupWizard/SelectLanguage";
@@ -34,7 +34,7 @@ export default class ArgumentParser {
 
             // run setup wizard
             const setupWizard: InstanceType<typeof SetupWizard>= new SetupWizard([
-               new Overview()
+               new ConfigOverview()
                , new SetupRole()
                , new EnableApis()
                , new SelectLanguage()

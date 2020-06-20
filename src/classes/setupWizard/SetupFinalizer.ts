@@ -40,7 +40,7 @@ After saving your file, run "node compiled/index.js --build" (or -b) from the pr
       // __dirname will be transpiled to the current directory
       fs.writeFile(
          filePath
-         , JSON.stringify(configFileData)
+         , JSON.stringify(configFileData, null, "\t")
          , "utf8"
          , error => {
             if (error) {
