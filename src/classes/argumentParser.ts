@@ -8,6 +8,12 @@ import SetupRole from "./setupWizard/SetupRole";
 import EnableApis from "./setupWizard/EnableApis";
 import SelectLanguage from "./setupWizard/SelectLanguage";
 import SelectRepeatCount from "./setupWizard/SelectRepeatCount";
+import BuildOverview from "./setupWizard/BuildOverview";
+
+// build related
+import BuildOrchestrator from "./sentenceBuilder/BuildOrchestrator";
+import Sentence from "./sentenceBuilder/Sentence";
+
 
 export default class ArgumentParser {
    protected commandLineArgs: string[];
@@ -59,6 +65,27 @@ export default class ArgumentParser {
 
          case "-b":
          case "--build": {
+            // parse sentence file and print count of valid ones
+            const buildOrchestrator = new BuildOrchestrator();
+            buildOrchestrator.parseValidateAndPrintSentenceCount();
+
+            // print instructions for usage
+            // parse sentence file. Print data about valid sentence and phrase count
+            const setupWizard = new SetupWizard([new BuildOverview]);
+
+            // run build process on all qualified sentences
+            buildOrchestrator.qualifiedSentences.forEach(Sentence => {
+               const folderExists = buildOrchestrator.checkForExistingFolder(Sentence);
+
+               if (folderExists === false) {
+                  buildOrchestrator.buildFolderAndAudioFile(Sentence);
+               }
+            });
+
+
+            console.log(`Your foreign translation audio course has been built. Happy learning! 
+
+You can add more sentences or phrases at any time and rerun the build process to add to your course.`)
 
             break;
          }
