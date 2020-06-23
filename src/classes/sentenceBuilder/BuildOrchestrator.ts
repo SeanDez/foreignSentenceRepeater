@@ -16,12 +16,14 @@ export default class BuildOrchestrator {
       this.printCountOfValidSentences();
    }
 
-   public checkForExistingFolder(sentence: Sentence) {
+   public checkForExistingFolder(sentence: Sentence): boolean {
+      const {folderName} = sentence;
 
+      return fs.existsSync(path.join(__dirname, `../../../audioCourse/${folderName}`))
    }
 
-   public buildFolderAndAudioFile(sentence: Sentence) {
-      
+   public makeFolderAndAudioFile(sentence: Sentence) {
+      this.makeSentenceFolder(sentence);
    }
 
    // --------------- Internal Methods
@@ -34,6 +36,20 @@ export default class BuildOrchestrator {
 
       return sentenceCandidates;
    }
+
+   protected makeSentenceFolder(sentence: Sentence): void {
+      fs.mkdirSync(path.join(__dirname, "../../../audioCourse/", sentence.folderName));
+   }
+
+   /**** Audio file creation ****/
+
+   // translate
+   getTranslation(sentence: Sentence) {
+      
+   }
+   
+   // start word asking loop
+
 
    /* Assigns instance property `qualifiedSentences`
       If length is greater than 1 the sentence/phrase passes 

@@ -1,18 +1,20 @@
-
 export default class Sentence {
    public englishVersion: string;
-   private folderName: string;
+   public folderName: string;
 
    // --------------- Constructor
+   // immediately builds its folder name representation
+   // this is used at a higher level for a check, and create
    constructor(originalSentence: string) {
       this.englishVersion = originalSentence;
+      this.buildFolderName();
    }
 
-   buildFolderName() {
+   public buildFolderName(): void {
       const capitalized = this.capitalizeAllWords();
-      const unsafeCharsExcludedIncludingSpaces = this
+      const noUnsafeCharacters = this
          .stripNonWordFolderCharacters();
-      this.folderName = unsafeCharsExcludedIncludingSpaces;
+      this.folderName = noUnsafeCharacters;
    }
 
    // --------------- Internal methods
