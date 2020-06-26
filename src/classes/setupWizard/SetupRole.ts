@@ -9,9 +9,10 @@ export default class SetupRole extends StepsBase implements WizardSteps {
    public needsFileValidation: boolean = true;
    
    public readonly header: string = `
-***********************************   
-     SETUP GOOGLE CLOUD ROLE
-***********************************
+*************************************  
+ SETUP GOOGLE CLOUD CREDENTIALS FILE
+*************************************
+
    `
 
    protected readonly description: string = `To use this app, you will need a Google Cloud account. 

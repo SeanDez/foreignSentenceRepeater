@@ -19,7 +19,6 @@ export default abstract class StepsBase {
     }
 
     public prompt() {
-        if (this.promptMessage)
        console.log(this.promptMessage);
        return readLine.question();
     }

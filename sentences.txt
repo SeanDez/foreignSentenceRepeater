@@ -1,3 +1,1 @@
 Put all sentences (and phrases) to be translated here, one per line.
-This is sentence two
-short phrase 3

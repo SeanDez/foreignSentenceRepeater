@@ -1,12 +1,17 @@
 import path from "path";
 import fs from "fs";
+import readLine from "readline-sync";
 
 import ConfigData from "../setupWizard/ConfigDataInterface";
+import ForeignWordDefinitionPair from "./ForeignWordDefinitionPairInterface";
+import Utilities from "../Utilities";
 
 const {TranslationServiceClient} = require('@google-cloud/translate');
 
 // dependent classes
 import Sentence from "./Sentence";
+
+enum translationDirection { toForeign, toEnglish }
 
 export default class BuildOrchestrator {
    // --------------- Instance Properties
@@ -32,20 +37,20 @@ export default class BuildOrchestrator {
    public checkForExistingFolder(sentence: Sentence): boolean {
       const {folderName} = sentence;
 
-      return fs.existsSync(path.join(__dirname, `../../../audioCourse/${folderName}`))
+      return fs.existsSync(path.join(__dirname, `../../../audioCourse/${folderName}`));
    }
 
-   public makeFolderAndAudioFile(sentence: Sentence) {
+   public makeFolderAndAudioFile(sentence: Sentence): void {
       // make folder IF not already there
-      // get text translation
       // start a loop to parse all foreign words and attach definitions
          // do this in another class 
       this.makeSentenceFolder(sentence);
 
-      const foreignText = this.textTranslate(sentence);
+      // get foreign language text for the full english sentence
+      const foreignText = this.textTranslate(sentence.englishVersion, translationDirection.toEnglish);
 
+      // get all foreign word and english definition pairs
       
-
    }
 
    // --------------- Internal Methods
@@ -93,22 +98,28 @@ export default class BuildOrchestrator {
 
    /**** Audio file creation ****/
 
-   // translate
-   public async textTranslate(wordPhraseSentence: Sentence) {
-      // access the right property for the variable to be used for translation
-      let englishText: string;
-      if (wordPhraseSentence instanceof Sentence) {
-         englishText = wordPhraseSentence.englishVersion;
-      }
-
-
+   // todo add the project id
+   // it'll have to come from config file
+   public async textTranslate(wordPhraseSentence: string, direction: translationDirection) {
       const translationClient = new TranslationServiceClient();
+
+      // setup target and source language
+      let sourceLanguage: string;
+      let targetLanguage: string;
+      if (direction === translationDirection.toEnglish) {
+         sourceLanguage = this.configData.languageCode;
+         targetLanguage = "en";
+      } else if (direction === translationDirection.toForeign) {
+         sourceLanguage = "en";
+         targetLanguage = this.configData.languageCode;
+      }
 
       const options = {
          parent: `projects/projectIdHere`
-         , contents: [englishText]
+         , contents: [wordPhraseSentence]
          , mimeType: 'text/plain'
-         , targetLanguageCode: this.configData.languageCode
+         , sourceLanguageCode: sourceLanguage
+         , targetLanguageCode: targetLanguage
       }
 
       try {
@@ -122,7 +133,55 @@ export default class BuildOrchestrator {
 
    }
    
-   // start word asking loop
+   /* 
+   Asks for the foreign word
+   
+   Gets a definition, asks for confirmation or an adjustment.
+   Returns an object with the foreign word and definition pair
+   
+   Returns false if user marks "done" commands
+   */
+   protected async getForeignWordAndDefinition()
+      : Promise<ForeignWordDefinitionPair | false> {
+      console.log("Please copy and paste the (next) foreign word in the sentence here. Or type -d or --done when all words in the sentence have been specified.")
+      const userInput = readLine.question();
+
+      const userHasExited = this.isDone(userInput);
+      if (userHasExited) return false;
+
+      // translate foreign to english
+      const foreignWord = userInput;
+
+      const googleOfferedDefinition: string = await this.textTranslate(
+         foreignWord, translationDirection.toEnglish
+      );
+
+      console.log("Type your own contextual definition for this word now. It will be used during audio translation. Or, press ENTER without typing anything to accept the following default definition from Google Translate:")
+      console.log(googleOfferedDefinition);
+      const userDefinition: string = readLine.question();
+
+      let acceptedDefinition = googleOfferedDefinition;
+      if (userDefinition !== "") {
+         acceptedDefinition = userDefinition;
+      } 
+
+      // shape the object and return it
+      const foreignWordDefinitionPair: ForeignWordDefinitionPair = {
+         foreignWord
+         , englishDefinition: acceptedDefinition
+      }
+
+      return foreignWordDefinitionPair;
+   }
+
+
+   private isDone(userInput: string): boolean {
+      if (userInput === "-d" || userInput === "--done") {
+         return true;
+      }
+
+      return false;
+   }
 
 
    /* Assigns instance property `qualifiedSentences`

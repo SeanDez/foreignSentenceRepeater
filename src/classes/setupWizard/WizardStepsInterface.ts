@@ -1,8 +1,8 @@
 /* Null means "absence of value" and best fits
 */
 export default interface WizardSteps {
-   hasSaveableData: boolean
-   , needsFileValidation: boolean
+   readonly hasSaveableData: boolean
+   , readonly needsFileValidation: boolean
    , readonly invalidInputMessage?: string
    , readonly configDataKey?: string
 

@@ -11,7 +11,6 @@ import path from "path";
 
 
 /* Takes an array of steps. Runs them in sequence
-   todo Have this code reviewed
 */
 export default class SetupWizard {
    // --------------- Properties
@@ -32,12 +31,15 @@ export default class SetupWizard {
 
       const configData = this.steps.reduce(
          (accumulator: Partial<ConfigData>, currentStepInstance: WizardSteps): Partial<ConfigData> => {
+         console.log("accumulator", accumulator);
+
          // instruct
          currentStepInstance.explain();
 
          // loop until a valid input is returned
          // exit code is also handled
          const validatedUserInput: string = this.getValidInput(currentStepInstance);
+         console.log('validatedUserInput', validatedUserInput);
 
          // blocks until valid file is found, on file validation steps
          if (currentStepInstance.needsFileValidation) {
@@ -45,14 +47,18 @@ export default class SetupWizard {
          }
 
          // return a k/v pair for steps with important inputs
+         const returnObject = {...accumulator};
+
          if (currentStepInstance.hasSaveableData) {
-            return {
-               ...accumulator
-               , [currentStepInstance.configDataKey] : validatedUserInput
-            };
+            Object.assign(returnObject, {
+               [currentStepInstance.configDataKey] : validatedUserInput
+            });
          } 
+
+         return returnObject;
       }, {}) as ConfigData; // assert return type on .reduce()
 
+      console.log('full object: configData', configData)
       return configData;
    }
 
@@ -83,6 +89,7 @@ export default class SetupWizard {
       }
    }
 
+
    private exitCheck(userInput: string) {
       const normalizedUserInput = userInput.trim().toLowerCase();
       enum exitCodes { exit = "exit", quit = "quit" }
@@ -93,6 +100,5 @@ export default class SetupWizard {
           process.exit();
       }
   }
-
 
 }
