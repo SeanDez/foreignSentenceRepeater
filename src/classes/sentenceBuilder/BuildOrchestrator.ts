@@ -37,17 +37,17 @@ export default class BuildOrchestrator {
       return fs.existsSync(path.join(__dirname, `../../../audioCourse/${folderName}`));
    }
 
-   public makeFolderAndAudioFile(sentence: Sentence): void {
+   public async makeFolderAndAudioFile(sentence: Sentence): Promise<void> {
       // make folder IF not already there
       // start a loop to parse all foreign words and attach definitions
          // do this in another class 
       this.makeSentenceFolder(sentence);
 
       // get foreign language text for the full english sentence
-      const foreignText = this.textTranslate(sentence.englishVersion, translationDirection.toEnglish);
+      const foreignText: string = await this.textTranslate(sentence.englishVersion, translationDirection.toEnglish);
 
       // get all foreign word and english definition pairs
-      
+      const wordDefinitionPairs: Array<ForeignWordDefinitionPair> = await Utilities.loopUntilFalse(this.getForeignWordAndDefinition);
    }
 
    // --------------- Internal Methods
@@ -95,7 +95,7 @@ export default class BuildOrchestrator {
 
    /**** Audio file creation ****/
 
-   public async textTranslate(wordPhraseSentence: string, direction: translationDirection) {
+   public async textTranslate(wordPhraseSentence: string, direction: translationDirection): Promise<string> {
       const translationClient = new TranslationServiceClient();
 
       // setup target and source language

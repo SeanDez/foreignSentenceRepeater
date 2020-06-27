@@ -7,12 +7,16 @@ export default class Utilities {
 
    If arguments are passed, use a wrapper function to return the callback, invoked with the desired arguments
    */
-   static loopUntilFalse<CallbackReturn>(callback: () => CallbackReturn | false): CallbackReturn[] {
+   static async loopUntilFalse<CallbackReturn>(callback: Function): Promise<CallbackReturn[]> {
       let continueLooping = true;
       const returnValues: Array<CallbackReturn> = [];
 
       while (continueLooping === true) {
-         const latestReturnValue: CallbackReturn | false = callback();
+         let latestReturnValue: CallbackReturn | false;
+         try {
+            latestReturnValue = await callback();
+         }
+         catch (error) { console.log(error); }
 
          if (latestReturnValue === false) { 
             continueLooping = false;
