@@ -16,10 +16,7 @@ enum translationDirection { toForeign, toEnglish }
 export default class BuildOrchestrator {
    // --------------- Instance Properties
    public qualifiedSentences: Array<Sentence>;
-   private configData: {
-      languageCode: string
-      , numberOfRepeats: number
-   }
+   private configData: ConfigData;
 
    // --------------- Constructor
    constructor() {
@@ -98,8 +95,6 @@ export default class BuildOrchestrator {
 
    /**** Audio file creation ****/
 
-   // todo add the project id
-   // it'll have to come from config file
    public async textTranslate(wordPhraseSentence: string, direction: translationDirection) {
       const translationClient = new TranslationServiceClient();
 
@@ -115,7 +110,7 @@ export default class BuildOrchestrator {
       }
 
       const options = {
-         parent: `projects/projectIdHere`
+         parent: `projects/${this.configData.projectId}`
          , contents: [wordPhraseSentence]
          , mimeType: 'text/plain'
          , sourceLanguageCode: sourceLanguage
