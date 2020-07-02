@@ -1,6 +1,13 @@
+import foresignWordDefinitionPair from "./ForeignPhraseDefinitionPairInterface";
+import ForeignWordDefinitionPair from "./ForeignPhraseDefinitionPairInterface";
+
 export default class Sentence {
+   // --------------- Properties
+
    public englishVersion: string;
    public folderName: string;
+   public foreignWordDefinitionPairs: ForeignWordDefinitionPair[]= []; 
+
 
    // --------------- Constructor
    // immediately builds its folder name representation

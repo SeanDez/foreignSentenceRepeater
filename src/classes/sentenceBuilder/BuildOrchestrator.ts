@@ -1,53 +1,54 @@
 import path from "path";
 import fs from "fs";
 import readLine from "readline-sync";
-
-import ConfigData from "../setupWizard/ConfigDataInterface";
-import ForeignWordDefinitionPair from "./ForeignWordDefinitionPairInterface";
-import Utilities from "../Utilities";
-
-const {TranslationServiceClient} = require('@google-cloud/translate');
+const audioConcat = require("audioconcat");
 
 // dependent classes
+import {translationDirection} from "../minorTypes";
 import Sentence from "./Sentence";
+import Utilities from "../Utilities";
+import AudioMaker from "./AudioMaker";
+import ConfigData from "../setupWizard/ConfigDataInterface";
+import ForeignPhraseDefinitionPair from "./ForeignPhraseDefinitionPairInterface";
 
-enum translationDirection { toForeign, toEnglish }
 
 export default class BuildOrchestrator {
    // --------------- Instance Properties
-   public qualifiedSentences: Array<Sentence>;
    private configData: ConfigData;
+   public qualifiedSentences: Array<Sentence>;
 
    // --------------- Constructor
    constructor() {
       this.configData = this.setConfigData();
+      this.setQualifiedSentences();
    }
 
    // --------------- Public Methods
 
-   public parseValidateAndPrintSentenceCount(filePath: string = undefined): void {
-      const sentenceCandidates = this.parseSentenceFile();
-      this.validateSentenceCandidates(sentenceCandidates);
-      this.printCountOfValidSentences();
-   }
+   /* 
+      This method controls the high level creation of each subfolder, along with audio contents
 
-   public checkForExistingFolder(sentence: Sentence): boolean {
-      const {folderName} = sentence;
-
-      return fs.existsSync(path.join(__dirname, `../../../audioCourse/${folderName}`));
-   }
-
-   public async makeFolderAndAudioFile(sentence: Sentence): Promise<void> {
+   */
+   public async makeFolderAndAudioFile(
+      sentence: Sentence
+      ): Promise<void> {
+      
       // make folder IF not already there
       // start a loop to parse all foreign words and attach definitions
          // do this in another class 
-      this.makeSentenceFolder(sentence);
+      
+      const audioMaker = new AudioMaker(this.configData, sentence);
+      const subFolderPath = audioMaker.makeSentenceFolder();
+      const tempFolderPath = fs.mkdtempSync(subFolderPath);
+      audioMaker.makeSentenceAudio(tempFolderPath, this.configData.numberOfRepeats);
+      audioMaker.makeAllWordAudios(tempFolderPath);
+      audioMaker.combineAll(tempFolderPath);
+      audioMaker.cleanUp(tempFolderPath);
+      
+   }
 
-      // get foreign language text for the full english sentence
-      const foreignText: string = await this.textTranslate(sentence.englishVersion, translationDirection.toEnglish);
-
-      // get all foreign word and english definition pairs
-      const wordDefinitionPairs: Array<ForeignWordDefinitionPair> = await Utilities.loopUntilFalse(this.getForeignWordAndDefinition);
+   public printCountOfValidSentences() {
+      console.log(`${this.qualifiedSentences} valid sentences (more than one character long) were found and parsed.`);
    }
 
    // --------------- Internal Methods
@@ -80,7 +81,14 @@ export default class BuildOrchestrator {
       return moddedConfig as ConfigData;
    }
 
-   protected parseSentenceFile(filepath = path.join(__dirname, "../../../sentences.txt")): Array<string> {
+
+   protected setQualifiedSentences(filePath: string = undefined): void {
+      const sentenceCandidates: string[] = this.parseSentenceFile();
+      this.validateAndSetSentenceCandidates(sentenceCandidates);
+   }
+
+
+   public parseSentenceFile(filepath = path.join(__dirname, "../../../sentences.txt")): Array<string> {
       const sentenceCandidates = fs
          .readFileSync(filepath)
          .toString()
@@ -89,100 +97,10 @@ export default class BuildOrchestrator {
       return sentenceCandidates;
    }
 
-   protected makeSentenceFolder(sentence: Sentence): void {
-      fs.mkdirSync(path.join(__dirname, "../../../audioCourse/", sentence.folderName));
-   }
-
-   /**** Audio file creation ****/
-
-   public async textTranslate(wordPhraseSentence: string, direction: translationDirection): Promise<string> {
-      const translationClient = new TranslationServiceClient();
-
-      // setup target and source language
-      let sourceLanguage: string;
-      let targetLanguage: string;
-      if (direction === translationDirection.toEnglish) {
-         sourceLanguage = this.configData.languageCode;
-         targetLanguage = "en";
-      } else if (direction === translationDirection.toForeign) {
-         sourceLanguage = "en";
-         targetLanguage = this.configData.languageCode;
-      }
-
-      const options = {
-         parent: `projects/${this.configData.projectId}`
-         , contents: [wordPhraseSentence]
-         , mimeType: 'text/plain'
-         , sourceLanguageCode: sourceLanguage
-         , targetLanguageCode: targetLanguage
-      }
-
-      try {
-         const [response] = await translationClient.translateText(options);
-         const {translations}: { translations: string[] } = response;
-         return translations[0];
-      }
-      catch (error) {
-         console.error(error.details)
-      }
-
-   }
-   
-   /* 
-   Asks for the foreign word
-   
-   Gets a definition, asks for confirmation or an adjustment.
-   Returns an object with the foreign word and definition pair
-   
-   Returns false if user marks "done" commands
-   */
-   protected async getForeignWordAndDefinition()
-      : Promise<ForeignWordDefinitionPair | false> {
-      console.log("Please copy and paste the (next) foreign word in the sentence here. Or type -d or --done when all words in the sentence have been specified.")
-      const userInput = readLine.question();
-
-      const userHasExited = this.isDone(userInput);
-      if (userHasExited) return false;
-
-      // translate foreign to english
-      const foreignWord = userInput;
-
-      const googleOfferedDefinition: string = await this.textTranslate(
-         foreignWord, translationDirection.toEnglish
-      );
-
-      console.log("Type your own contextual definition for this word now. It will be used during audio translation. Or, press ENTER without typing anything to accept the following default definition from Google Translate:")
-      console.log(googleOfferedDefinition);
-      const userDefinition: string = readLine.question();
-
-      let acceptedDefinition = googleOfferedDefinition;
-      if (userDefinition !== "") {
-         acceptedDefinition = userDefinition;
-      } 
-
-      // shape the object and return it
-      const foreignWordDefinitionPair: ForeignWordDefinitionPair = {
-         foreignWord
-         , englishDefinition: acceptedDefinition
-      }
-
-      return foreignWordDefinitionPair;
-   }
-
-
-   private isDone(userInput: string): boolean {
-      if (userInput === "-d" || userInput === "--done") {
-         return true;
-      }
-
-      return false;
-   }
-
-
    /* Assigns instance property `qualifiedSentences`
       If length is greater than 1 the sentence/phrase passes 
    */
-   protected validateSentenceCandidates(candidates: string[]) {
+   protected validateAndSetSentenceCandidates(candidates: string[]): void {
       const passedTheTest: Sentence[] = candidates.map(candidate => {
          if (candidate.length >= 2) {
             return new Sentence(candidate);
@@ -192,8 +110,10 @@ export default class BuildOrchestrator {
       this.qualifiedSentences = passedTheTest;
    }
 
-   protected printCountOfValidSentences() {
-      console.log(`${this.qualifiedSentences} valid sentences (more than one character long) were found and parsed.`);
+   public checkForExistingFolder(sentence: Sentence): boolean {
+      const {folderName} = sentence;
+
+      return fs.existsSync(path.join(__dirname, `../../../audioCourse/${folderName}`));
    }
 
 }

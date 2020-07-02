@@ -67,15 +67,15 @@ export default class ArgumentParser {
 
          case "-b":
          case "--build": {
-            // parse sentence file and print count of valid ones
+            // parses sentence file for qualified sentences on instantiation
             const buildOrchestrator = new BuildOrchestrator();
-            buildOrchestrator.parseValidateAndPrintSentenceCount();
+
+            buildOrchestrator.printCountOfValidSentences();
 
             // print instructions for usage
-            // parse sentence file. Print data about valid sentence and phrase count
             const setupWizard = new SetupWizard([new BuildOverview]);
 
-            // run build process on all qualified sentences
+            // runs build process on all qualified sentences
             buildOrchestrator.qualifiedSentences.forEach(Sentence => {
                const folderExists = buildOrchestrator.checkForExistingFolder(Sentence);
 

@@ -7,6 +7,7 @@
        "sourceMap": true
        , "outDir": "compiled/"
        , "esModuleInterop": true
+       , "strictNullChecks": true
    },
    "include": ["src/**/*"]
    , "exclude": ["node_modules", "compiled", "__tests__"]

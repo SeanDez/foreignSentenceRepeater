@@ -1,5 +1,5 @@
 
 export default interface ForeignWordDefinitionPair {
-   foreignWord: string
+   foreignPhrase: string
    , englishDefinition: string
 }
