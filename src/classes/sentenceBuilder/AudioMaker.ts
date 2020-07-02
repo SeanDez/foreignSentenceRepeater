@@ -2,6 +2,7 @@ import fs, { writeFile } from "fs";
 import path from "path";
 import util from "util";
 import readLine from "readline-sync";
+import { audioParentFolderPath, silenceFolderPath } from "../../globals";
 const audioConcat = require("audioconcat");
 const tmp = require("tmp");
 
@@ -105,15 +106,15 @@ export default class AudioMaker {
       // 2 for 1st word, plus 1 per word thereafter
       let pauseDuration: number = 2 + foreignWordCount;
       if (pauseDuration > 12) { pauseDuration = 12 }
+      const pauseFilePath = `${silenceFolderPath}/${pauseDuration}.ogg`;
       
       /**** Save To Production Subfolder ****/
       
-      const finalSaveFolderPath = , this.sentence.folderName);
-      const finalFileSavePath = `${finalSaveFolderPath}/${fileNumberPrefix} - ${this.sentence.folderName}.ogg`;
+      const finalSaveFolderPath: string = path.join(audioParentFolderPath, this.sentence.folderName);
 
       this.combineAndSave(
-         [englishAudioTempPath, pauseDuration, foreignAudioTempPath]
-         , 
+         [englishAudioTempPath, pauseFilePath, foreignAudioTempPath]
+         , finalSaveFolderPath, 1
       )
 
    }
@@ -328,12 +329,13 @@ export default class AudioMaker {
       save an array of audios to a folder
    */
    protected combineAndSave(
-      audiosAndPauses: Array<string>
+      audiosAndPauseFiles: Array<string>
       , savePath: string
       , fileNumberPrefix: number
    ): void {
+      const finalFileSavePath = `${savePath}/${fileNumberPrefix} - ${this.sentence.folderName}.ogg`;
 
-      audioConcat(audiosAndPauses)
+      audioConcat(audiosAndPauseFiles)
          .concat(finalFileSavePath)
          .on("start", (command: any) => {
             console.log(`ffmpeg build process started on file: ${finalFileSavePath}`);

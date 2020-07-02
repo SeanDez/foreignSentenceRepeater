@@ -1,3 +1,5 @@
 import path from "path";
 
-global.audioFolderPath = path.join(__dirname, "../../../audioCourse/"
+export const audioParentFolderPath = path.join(__dirname, "../../../audioCourse/");
+
+export const silenceFolderPath = path.join(__dirname, "../../../silences/");
