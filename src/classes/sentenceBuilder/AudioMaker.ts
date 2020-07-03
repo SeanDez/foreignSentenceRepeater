@@ -2,7 +2,7 @@ import fs, { writeFile } from "fs";
 import path from "path";
 import util from "util";
 import readLine from "readline-sync";
-import { audioParentFolderPath, silenceFolderPath } from "../../globals";
+import { audioParentFolderPath, silenceFolderPath, twoSecondPause, threeSecondPause, fourSecondPause, fiveSecondPause } from "../../globals";
 const audioConcat = require("audioconcat");
 const tmp = require("tmp");
 
@@ -43,7 +43,7 @@ export default class AudioMaker {
    /* 
       Makes an audio of the sentence, in the sentence's subfolder
    */
-   public async makeSentenceAudio(subFolderPath: string, foreignWordCount: number): Promise<void> {
+   public async makeSentenceAudio(foreignWordCount: number): Promise<void> {
       // TTS it into an ogg file
       // file name starts with the track number
       // add the pause
@@ -65,7 +65,10 @@ export default class AudioMaker {
             this.sentence.englishVersion
             , translationDirection.toForeign);   
       }
-      catch(error) { console.log(error); }
+      catch(error) { 
+         console.log(error); 
+         throw Error(error);
+      }
 
       const foreignAudioOptions = {
          ...sharedOptions
@@ -104,16 +107,16 @@ export default class AudioMaker {
       /**** Add Pause ****/
 
       // 2 for 1st word, plus 1 per word thereafter
-      let pauseDuration: number = 2 + foreignWordCount;
-      if (pauseDuration > 12) { pauseDuration = 12 }
-      const pauseFilePath = `${silenceFolderPath}/${pauseDuration}.ogg`;
+      let mainPauseDuration: number = 2 + foreignWordCount;
+      if (mainPauseDuration > 12) { mainPauseDuration = 12 }
+      const pauseFilePath = `${silenceFolderPath}/${mainPauseDuration}.ogg`;
       
       /**** Save To Production Subfolder ****/
       
       const finalSaveFolderPath: string = path.join(audioParentFolderPath, this.sentence.folderName);
 
       this.combineAndSave(
-         [englishAudioTempPath, pauseFilePath, foreignAudioTempPath]
+         [englishAudioTempPath, pauseFilePath, foreignAudioTempPath, threeSecondPause]
          , finalSaveFolderPath, 1
       )
 
@@ -148,7 +151,7 @@ export default class AudioMaker {
       if (direction === translationDirection.toEnglish) {
          sourceLanguage = this.configData.languageCode;
          targetLanguage = "en";
-      } else if (direction === translationDirection.toForeign) {
+      } else {
          sourceLanguage = "en";
          targetLanguage = this.configData.languageCode;
       }
@@ -168,6 +171,7 @@ export default class AudioMaker {
       }
       catch (error) {
          console.error(error.details)
+         throw Error(error.details);
       }
 
    }
@@ -277,7 +281,7 @@ export default class AudioMaker {
       , sentence: Sentence
       , pauseDuration: number
       , orderInFolder: number
-      , foreignWordDefinitionPair?: ForeignPhraseDefinitionPair): void {
+      , foreignWordDefinitionPair: ForeignPhraseDefinitionPair): void {
 
       const {foreignWordsFilePath, englishDefinitionFilePath} = ttsAudioTempFilePaths;
       
@@ -320,7 +324,7 @@ export default class AudioMaker {
 
       try {
          const [audioResponse] = await textToSpeech.synthesizeSpeech(request);
-         await writeFileAsync(fileNameAndPath, audioResponse.audioContent);
+         await writeFileAsync(fileNameAndPath, audioResponse.audioContent!);
       }
       catch(error) { console.log(error); }
    }

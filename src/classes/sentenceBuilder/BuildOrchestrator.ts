@@ -39,11 +39,10 @@ export default class BuildOrchestrator {
       
       const audioMaker = new AudioMaker(this.configData, sentence);
       const subFolderPath = audioMaker.makeSentenceFolder();
-      const tempFolderPath = fs.mkdtempSync(subFolderPath);
-      audioMaker.makeSentenceAudio(tempFolderPath, this.configData.numberOfRepeats);
-      audioMaker.makeAllWordAudios(tempFolderPath);
-      audioMaker.combineAll(tempFolderPath);
-      audioMaker.cleanUp(tempFolderPath);
+      audioMaker.makeSentenceAudio(this.configData.numberOfRepeats);
+      audioMaker.makeAllWordAudios();
+      audioMaker.combineAll();
+      audioMaker.cleanUp();
       
    }
 
@@ -82,7 +81,7 @@ export default class BuildOrchestrator {
    }
 
 
-   protected setQualifiedSentences(filePath: string = undefined): void {
+   protected setQualifiedSentences(filePath: string): void {
       const sentenceCandidates: string[] = this.parseSentenceFile();
       this.validateAndSetSentenceCandidates(sentenceCandidates);
    }
@@ -101,13 +100,19 @@ export default class BuildOrchestrator {
       If length is greater than 1 the sentence/phrase passes 
    */
    protected validateAndSetSentenceCandidates(candidates: string[]): void {
-      const passedTheTest: Sentence[] = candidates.map(candidate => {
+      const passedTheTest: Sentence[] | undefined = candidates.map(candidate => {
          if (candidate.length >= 2) {
             return new Sentence(candidate);
          }
       });
 
-      this.qualifiedSentences = passedTheTest;
+
+      if (Array.isArray(this.qualifiedSentences)) {
+         this.qualifiedSentences = passedTheTest;
+      }
+      else {
+         throw Error("Error: No qualified sentences found");
+      }
    }
 
    public checkForExistingFolder(sentence: Sentence): boolean {
