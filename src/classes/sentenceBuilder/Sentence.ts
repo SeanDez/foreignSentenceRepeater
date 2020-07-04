@@ -14,14 +14,14 @@ export default class Sentence {
    // this is used at a higher level for a check, and create
    constructor(originalSentence: string) {
       this.englishVersion = originalSentence;
-      this.buildFolderName();
+      this.folderName = this.buildFolderName();
    }
 
-   public buildFolderName(): void {
+   public buildFolderName(): string {
       const capitalized = this.capitalizeAllWords();
       const noUnsafeCharacters = this
          .stripNonWordFolderCharacters();
-      this.folderName = noUnsafeCharacters;
+      return noUnsafeCharacters;
    }
 
    // --------------- Internal methods

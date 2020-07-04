@@ -5,8 +5,8 @@ export default abstract class StepsBase {
     public hasSaveableData: boolean = false;
     public needsFileValidation: boolean = false;
 
-    protected header: string;
-    protected description: string;
+    protected header: string = ``;
+    protected description: string = ``;
     protected promptMessage: string = `Press any key to continue...
 `;
 

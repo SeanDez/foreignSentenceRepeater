@@ -15,12 +15,12 @@ import ForeignPhraseDefinitionPair from "./ForeignPhraseDefinitionPairInterface"
 export default class BuildOrchestrator {
    // --------------- Instance Properties
    private configData: ConfigData;
-   public qualifiedSentences: Array<Sentence>;
+   public qualifiedSentences: Array<Sentence> = [];
 
    // --------------- Constructor
    constructor() {
       this.configData = this.setConfigData();
-      this.setQualifiedSentences();
+      this.qualifiedSentences = this.setQualifiedSentences();
    }
 
    // --------------- Public Methods
@@ -81,9 +81,10 @@ export default class BuildOrchestrator {
    }
 
 
-   protected setQualifiedSentences(filePath: string): void {
+   protected setQualifiedSentences(): Sentence[] {
       const sentenceCandidates: string[] = this.parseSentenceFile();
-      this.validateAndSetSentenceCandidates(sentenceCandidates);
+      const validated: Sentence[] = this.validateAndSetSentenceCandidates(sentenceCandidates);
+      return validated;
    }
 
 
@@ -99,16 +100,22 @@ export default class BuildOrchestrator {
    /* Assigns instance property `qualifiedSentences`
       If length is greater than 1 the sentence/phrase passes 
    */
-   protected validateAndSetSentenceCandidates(candidates: string[]): void {
-      const passedTheTest: Sentence[] | undefined = candidates.map(candidate => {
-         if (candidate.length >= 2) {
-            return new Sentence(candidate);
-         }
-      });
+   protected validateAndSetSentenceCandidates(candidates: string[]) {
+      const passedAndUndefined: Array<Sentence | null> = candidates
+         .map(candidate => {
+            if (candidate.length >= 2) {
+               return new Sentence(candidate);
+            }
+            
+            return null
+         });
+      const passedTest: Sentence[] = passedAndUndefined
+         .filter((item: Sentence | null): item is Sentence => item !== undefined);
 
+         
 
       if (Array.isArray(this.qualifiedSentences)) {
-         this.qualifiedSentences = passedTheTest;
+         return passedTest;
       }
       else {
          throw Error("Error: No qualified sentences found");

@@ -2,7 +2,7 @@ import WizardSteps from "./WizardStepsInterface";
 import ConfigData from "./ConfigDataInterface";
 import fs from "fs";
 import path from "path";
-
+import {assertNever} from "assert-never";
 
 /* SetupWizard will loop through child classes that employ some of these processes
 
@@ -42,17 +42,25 @@ export default class SetupWizard {
          console.log('validatedUserInput', validatedUserInput);
 
          // blocks until valid file is found, on file validation steps
-         if (currentStepInstance.needsFileValidation) {
+         if (currentStepInstance.needsFileValidation && currentStepInstance.validateFile) {
             currentStepInstance.validateFile();
          }
 
          // return a k/v pair for steps with important inputs
-         const returnObject = {...accumulator};
+         const returnObject: Partial<ConfigData> = accumulator;
 
-         if (currentStepInstance.hasSaveableData) {
-            Object.assign(returnObject, {
-               [currentStepInstance.configDataKey] : validatedUserInput
-            });
+
+         if (currentStepInstance.hasSaveableData && currentStepInstance.configDataKey) {
+            const configDataKey = currentStepInstance.configDataKey;
+            switch(configDataKey) {
+               // special case type conversion
+               case "numberOfRepeats":
+                  returnObject[configDataKey] = Number(validatedUserInput);
+                  break;
+               default: // no type conversion, string passed along
+                  returnObject[configDataKey] = validatedUserInput;
+                  break;
+            }
          } 
 
          return returnObject;
@@ -70,9 +78,7 @@ export default class SetupWizard {
       Validator is contained in the object itself, accesed via duck typing
    */
    protected getValidInput(configStep: WizardSteps): string {
-      let continueLooping = true;
-
-      while (continueLooping === true) {
+      while (true) {
          const rawInput: string = configStep.prompt();
 
          // check for an exit value
@@ -81,12 +87,13 @@ export default class SetupWizard {
          const inputIsValid: boolean = configStep.validateInput(rawInput);
 
          if (inputIsValid) {
-            continueLooping = false;
             return rawInput;
          } else {
             console.log(configStep.invalidInputMessage)
          }
       }
+
+      throw new Error("Should be unreachable");
    }
 
 

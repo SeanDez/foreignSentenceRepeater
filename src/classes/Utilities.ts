@@ -16,7 +16,10 @@ export default class Utilities {
          try {
             latestReturnValue = await callback();
          }
-         catch (error) { console.log(error); }
+         catch (error) { 
+            console.log(error); 
+            throw Error(`Error: ${error}`);
+         }
 
          if (latestReturnValue === false) { 
             continueLooping = false;

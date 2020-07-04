@@ -76,11 +76,13 @@ export default class ArgumentParser {
             const setupWizard = new SetupWizard([new BuildOverview]);
 
             // runs build process on all qualified sentences
-            buildOrchestrator.qualifiedSentences.forEach(Sentence => {
-               const folderExists = buildOrchestrator.checkForExistingFolder(Sentence);
+            buildOrchestrator.qualifiedSentences.forEach(sentence => {
+               if (sentence !== undefined) {
+                  const folderExists = buildOrchestrator.checkForExistingFolder(sentence);
 
-               if (folderExists === false) {
-                  buildOrchestrator.makeFolderAndAudioFile(Sentence);
+                  if (folderExists === false) {
+                     buildOrchestrator.makeFolderAndAudioFile(sentence);
+                  }   
                }
             });
 

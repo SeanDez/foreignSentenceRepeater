@@ -2,8 +2,8 @@ import BuildOrchestrator from "../BuildOrchestrator";
 
 class BuildOrchExposed extends BuildOrchestrator {
    
-   public parseSentenceFileExp(filePathOverride: string) {
-      return this.parseSentenceFile(filePathOverride);
+   public parseSentenceFileExp() {
+      return this.parseSentenceFile();
    }
 
    public validateSentenceCandidatesExp() {
@@ -14,6 +14,6 @@ class BuildOrchExposed extends BuildOrchestrator {
 test("parseSentenceFile()", () => {
    // setup
    const buildOrchExposed = new BuildOrchExposed();
-   buildOrchExposed.parseSentenceFileExp(undefined);
+   buildOrchExposed.parseSentenceFileExp();
 
 });
