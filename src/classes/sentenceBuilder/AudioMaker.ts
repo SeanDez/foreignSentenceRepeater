@@ -43,7 +43,7 @@ export default class AudioMaker {
    /* 
       Makes an audio of the sentence, in the sentence's subfolder
    */
-   public async makeSentenceAudio(foreignWordCount: number): Promise<void> {
+   public async makeSentenceTrack(foreignWordCount: number, prefix: string): Promise<void> {
       // TTS it into an ogg file
       // file name starts with the track number
       // add the pause
@@ -94,10 +94,10 @@ export default class AudioMaker {
 
       const tempFolder = tmp.dirSync({unsafeCleanup: true});
       
-      const foreignAudioName = `1 - ${foreignSentenceText}.ogg`;
+      const foreignAudioName = `${prefix} - ${foreignSentenceText}.ogg`;
       const foreignAudioTempPath = `${tempFolder}${foreignAudioName}`
 
-      const englishAudioName = `1 - ${this.sentence.folderName}.ogg`;
+      const englishAudioName = `${prefix} - ${this.sentence.folderName}.ogg`;
       const englishAudioTempPath = `${tempFolder}${englishAudioName}`
       
       this.fetchAndWriteAudio(foreignAudioOptions, foreignAudioTempPath);
@@ -117,14 +117,20 @@ export default class AudioMaker {
 
       this.combineAndSave(
          [englishAudioTempPath, pauseFilePath, foreignAudioTempPath, threeSecondPause]
-         , finalSaveFolderPath, 1
+         , finalSaveFolderPath
+         , prefix
       )
 
    }
 
    public makeAllWordAudios() {}
 
-   public combineAll() {}
+   public duplicateTrack(
+      leadingMatcher: string
+      , copiedPrefix: string): void {
+      // gather all filenames in the subfolder
+      // 
+   }
 
    public cleanUp() {}
 
@@ -335,9 +341,9 @@ export default class AudioMaker {
    protected combineAndSave(
       audiosAndPauseFiles: Array<string>
       , savePath: string
-      , fileNumberPrefix: number
+      , filePrefix: string
    ): void {
-      const finalFileSavePath = `${savePath}/${fileNumberPrefix} - ${this.sentence.folderName}.ogg`;
+      const finalFileSavePath = `${savePath}/${filePrefix} - ${this.sentence.folderName}.ogg`;
 
       audioConcat(audiosAndPauseFiles)
          .concat(finalFileSavePath)

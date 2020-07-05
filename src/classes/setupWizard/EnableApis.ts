@@ -2,10 +2,13 @@ import StepsBase from "./StepsBase";
 import WizardSteps from "./WizardStepsInterface";
 
 export default class EnableApis extends StepsBase implements WizardSteps {
-   protected readonly description: string = `
+   protected readonly header: string = `
 ***********************************
             Enable APIs
 ***********************************
+`
+
+   protected readonly description: string = `
 
 For this step, you will need to log into Google Cloud and select the project you just created in the prior step. The project can be selected in the topmost nav bar, next to the Google Cloud logo (if it is not already chosen).
 

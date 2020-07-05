@@ -39,9 +39,13 @@ export default class BuildOrchestrator {
       
       const audioMaker = new AudioMaker(this.configData, sentence);
       const subFolderPath = audioMaker.makeSentenceFolder();
-      audioMaker.makeSentenceAudio(this.configData.numberOfRepeats);
+
+      const leadSentencePrefix = `1`;
+      audioMaker.makeSentenceTrack(this.configData.numberOfRepeats, leadSentencePrefix);
       audioMaker.makeAllWordAudios();
-      audioMaker.combineAll();
+
+      const repeatSentencePrefix = `3-repeat:`;
+      audioMaker.duplicateTrack(leadSentencePrefix, repeatSentencePrefix);
       audioMaker.cleanUp();
       
    }
