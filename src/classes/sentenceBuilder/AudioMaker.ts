@@ -126,17 +126,36 @@ export default class AudioMaker {
    public makeAllWordAudios() {}
 
    public duplicateTrack(
-      leadingMatcher: string
-      , copiedPrefix: string): void {
+      prefixMatcher: string
+      , copiedFileName: string): void {
       // gather all filenames in the subfolder
-      // 
+      // isolate the one that matches the prefix
+      // run a copy operation on that file
+      // save to the sentence folder with the new name
+
+      const targetAudioFolder = `${audioParentFolderPath}${this.sentence.folderName}`;
+
+      // readDirSync returns file names, not file paths
+      const audioFileNames: string[] = fs.readdirSync(targetAudioFolder);
+      
+      const regexMatcherFromBeginning: RegExp = new RegExp(`^${prefixMatcher}`);
+      
+      const targetFile: string = audioFileNames.filter(filename => {
+         const matchFound: boolean = regexMatcherFromBeginning.test(filename);
+         
+         return matchFound;
+      })[0]; // returns first match only!
+
+      const sourceFileNameAndPath = `${targetAudioFolder}/${targetFile}`;
+      const copiedFileNameAndPath = `${targetAudioFolder}/${copiedFileName}`;
+
+      fs.copyFileSync(sourceFileNameAndPath, copiedFileNameAndPath);
    }
 
-   public cleanUp() {}
 
    // --------------- Internal Methods
 
-   public parseSentenceFile(filepath = path.join(__dirname, "../../../sentences.txt")): Array<string> {
+   public parseFileContents(filepath = path.join(__dirname, "../../../sentences.txt")): Array<string> {
       const sentenceCandidates = fs
          .readFileSync(filepath)
          .toString()

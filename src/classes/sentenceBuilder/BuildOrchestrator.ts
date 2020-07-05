@@ -44,9 +44,8 @@ export default class BuildOrchestrator {
       audioMaker.makeSentenceTrack(this.configData.numberOfRepeats, leadSentencePrefix);
       audioMaker.makeAllWordAudios();
 
-      const repeatSentencePrefix = `3-repeat:`;
-      audioMaker.duplicateTrack(leadSentencePrefix, repeatSentencePrefix);
-      audioMaker.cleanUp();
+      const repeatSentenceFileName = `3-repeat-sentence.ogg:`;
+      audioMaker.duplicateTrack(leadSentencePrefix, repeatSentenceFileName);
       
    }
 
