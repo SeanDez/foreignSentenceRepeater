@@ -1,11 +1,12 @@
 import WizardSteps from "./WizardStepsInterface";
 import StepsBase from "./StepsBase";
+import ConfigData from "./ConfigDataInterface";
 
 export default class SelectLanguage extends StepsBase implements WizardSteps {
    // --------------- Properties
 
    public readonly hasSaveableData: boolean = true;
-   public readonly configDataKey: string = "languageCode";
+   public readonly configDataKey: keyof ConfigData = "languageCode";
 
    protected readonly header: string = `
 ******************************************

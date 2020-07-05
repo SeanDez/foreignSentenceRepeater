@@ -1,9 +1,10 @@
 import StepsBase from "./StepsBase";
 import WizardSteps from "./WizardStepsInterface";
+import ConfigData from "./ConfigDataInterface";
 
 export default class SetupProjectID extends StepsBase implements WizardSteps {
    public readonly hasSaveableData: boolean = true;
-   public readonly configDataKey: string = "projectId";
+   public readonly configDataKey: keyof ConfigData = "projectId";
 
    protected header: string = `
 *************************************  

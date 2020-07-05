@@ -1,10 +1,11 @@
 import WizardSteps from "./WizardStepsInterface";
 import StepsBase from "./StepsBase";
 import { isNumber } from "util";
+import ConfigData from "./ConfigDataInterface";
 
 export default class SelectLanguage extends StepsBase implements WizardSteps {
    public readonly hasSaveableData: boolean = true;
-   public readonly configDataKey: string = "numberOfRepeats";
+   public readonly configDataKey: keyof ConfigData = "numberOfRepeats";
    private maxRepeats: number = 30;
 
    public readonly header: string = `
