@@ -40,10 +40,14 @@ export default class BuildOrchestrator {
       const audioMaker = new AudioMaker(this.configData, sentence);
       const subFolderPath = audioMaker.makeSentenceFolder();
 
-      const leadSentencePrefix = `1`;
-      audioMaker.makeSentenceTrack(this.configData.numberOfRepeats, leadSentencePrefix);
+      // make word definition track
       audioMaker.makeAllWordAudios();
 
+      // make first sentence track
+      const leadSentencePrefix = `1`;
+      audioMaker.makeSentenceTrack(this.configData.numberOfRepeats, leadSentencePrefix);
+
+      // make the final reinforcement sentence
       const repeatSentenceFileName = `3-repeat-sentence.ogg:`;
       audioMaker.duplicateTrack(leadSentencePrefix, repeatSentenceFileName);
       

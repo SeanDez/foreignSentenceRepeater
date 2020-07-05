@@ -2,7 +2,7 @@ import fs, { writeFile } from "fs";
 import path from "path";
 import util from "util";
 import readLine from "readline-sync";
-import { audioParentFolderPath, silenceFolderPath, twoSecondPause, threeSecondPause, fourSecondPause, fiveSecondPause } from "../../globals";
+import { audioParentFolderPath, silenceFolderPath, oneSecondPause, twoSecondPause, threeSecondPause, fourSecondPause, fiveSecondPause } from "../../globals";
 const audioConcat = require("audioconcat");
 const tmp = require("tmp");
 
@@ -43,14 +43,8 @@ export default class AudioMaker {
    /* 
       Makes an audio of the sentence, in the sentence's subfolder
    */
-   public async makeSentenceTrack(foreignWordCount: number, prefix: string): Promise<void> {
-      // TTS it into an ogg file
-      // file name starts with the track number
-      // add the pause
-      // save to the subfolder
-      // fin
+   public async makeSentenceTrack(numberOfRepeats: number, prefix: string): Promise<void> {
 
-      
       /**** Setup Audio Options ****/
 
       // define audio options (including text)
@@ -104,34 +98,48 @@ export default class AudioMaker {
       this.fetchAndWriteAudio(englishAudioOptions, englishAudioTempPath);
       // 1 level files saved to temp folder now
 
-      /**** Add Pause ****/
 
+      /**** Add Pause ****/
       // 2 for 1st word, plus 1 per word thereafter
-      let mainPauseDuration: number = 2 + foreignWordCount;
+      let mainPauseDuration: number = 2 + this.sentence.foreignWordCount;
       if (mainPauseDuration > 12) { mainPauseDuration = 12 }
       const pauseFilePath = `${silenceFolderPath}/${mainPauseDuration}.ogg`;
       
+
+      /**** Setup audio structure ****/
+      const singlePassStructure = [englishAudioTempPath, pauseFilePath, foreignAudioTempPath, threeSecondPause];
+      let endStructure = singlePassStructure;
+
+      // if repeats are > 1, add another round of sentence repeats with a (much) shorter middle pause
+      for (let i = 1; i <= numberOfRepeats - 1; i++) {
+         const repeatStructure = [englishAudioTempPath, twoSecondPause, foreignAudioTempPath, threeSecondPause];
+
+         endStructure.concat(repeatStructure);
+      }
+
       /**** Save To Production Subfolder ****/
       
       const finalSaveFolderPath: string = path.join(audioParentFolderPath, this.sentence.folderName);
 
+
       this.combineAndSave(
-         [englishAudioTempPath, pauseFilePath, foreignAudioTempPath, threeSecondPause]
+         endStructure
          , finalSaveFolderPath
          , prefix
       )
-
    }
 
    public makeAllWordAudios() {}
 
+
+   /* 
+      Copies file to same folder with a different filename
+
+      @param copiedFileName. Should contain the full filename including extension
+   */
    public duplicateTrack(
       prefixMatcher: string
       , copiedFileName: string): void {
-      // gather all filenames in the subfolder
-      // isolate the one that matches the prefix
-      // run a copy operation on that file
-      // save to the sentence folder with the new name
 
       const targetAudioFolder = `${audioParentFolderPath}${this.sentence.folderName}`;
 
@@ -293,42 +301,6 @@ export default class AudioMaker {
       return pauseDuration;
    }
 
-   /* Takes one TTS audio, one silence, and combine them together
-      
-      Most single words will get 2 seconds. Sentences can run longer
-
-      No type definition file for the audioConcat library
-
-      Note: `WordDefinitionPair` applies to full sentences too
-   */
-   public combineTTSAudioWithSilence(
-      ttsAudioTempFilePaths: {foreignWordsFilePath: string, englishDefinitionFilePath: string}
-      , sentence: Sentence
-      , pauseDuration: number
-      , orderInFolder: number
-      , foreignWordDefinitionPair: ForeignPhraseDefinitionPair): void {
-
-      const {foreignWordsFilePath, englishDefinitionFilePath} = ttsAudioTempFilePaths;
-      
-      const silenceFilePath = path.join(__dirname, `../../../silences/${pauseDuration}.ogg`);
-
-      const filesInProperOrder = [foreignWordsFilePath, silenceFilePath, englishDefinitionFilePath];
-
-      const fullOutputPath = path.join(
-         __dirname
-         , `../../../audioCourse/${sentence.folderName}/${orderInFolder} ${foreignWordDefinitionPair.foreignPhrase}`
-      )
-
-      audioConcat(filesInProperOrder)
-         .concat(fullOutputPath)
-         .on("start", (command: any) => console.log(`ffmpeg process started: ${command}`))
-         .on("error", (error: Error) => console.error('error', error))
-         .on("end", (output: any) => console.log("Audio created in: ", output));
-
-   }
-
-
-   
 
    // --------------- Internal Methods
 
@@ -378,5 +350,6 @@ export default class AudioMaker {
             console.log('stderr', stderr);
          });
    }
+
 
 }

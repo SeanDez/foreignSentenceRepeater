@@ -7,6 +7,7 @@ export default class Sentence {
    public englishVersion: string;
    public folderName: string;
    public foreignWordDefinitionPairs: ForeignWordDefinitionPair[]= []; 
+   public foreignWordCount: number = this.foreignWordDefinitionPairs.length;
 
 
    // --------------- Constructor
