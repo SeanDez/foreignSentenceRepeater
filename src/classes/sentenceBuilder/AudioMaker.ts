@@ -12,7 +12,7 @@ import ConfigData from "../setupWizard/ConfigDataInterface";
 import ForeignPhraseDefinitionPair from "./ForeignPhraseDefinitionPairInterface";
 import {translationDirection, voiceGender, audioEncoding} from "../minorTypes";
 import {TextToSpeechClient} from "@google-cloud/text-to-speech";
-
+import WordFile, {contentTypes} from "./WordFile";
 
 
 const {TranslationServiceClient} = require('@google-cloud/translate');
@@ -106,7 +106,7 @@ export default class AudioMaker {
       const pauseFilePath = `${silenceFolderPath}/${mainPauseDuration}.ogg`;
       
 
-      /**** Setup audio structure ****/
+      /**** Setup final audio file structure ****/
       const singlePassStructure = [englishAudioTempPath, pauseFilePath, foreignAudioTempPath, threeSecondPause];
       let endStructure = singlePassStructure;
 
@@ -129,7 +129,45 @@ export default class AudioMaker {
       )
    }
 
-   public makeAllWordAudios() {}
+
+   public async makeAllWordAudios(): Promise<void> {
+      // sets data to this.sentence.foreignPhraseDefinitionPairs
+      await this.gatherAllForeignWordsAndDefinitionsFromUser();
+
+      /**** Build word def audios to temp directory ****/
+      
+      const tempFolder: ReturnType<typeof tmp.dirSync> = tmp.dirSync({unsafeCleanup : true});
+
+      this.buildWordDefinitionAudiosToTempFolder(tempFolder);
+
+      const tempFileNames: Array<string> = fs.readdirSync(tempFolder);
+
+      
+      /**** Convert from filenames to WordFile objects  ****/
+      // contains metadat for pauses, full filepaths
+      const wordFileObjects = tempFileNames.map(fileName => {
+         return new WordFile(fileName, tempFolder);
+      })
+
+
+      /**** Structure the file order, including silences ****/
+      // use WordFile metadata to structure the audio files and pauses
+
+      const finalAudioStructure = this.makeAudioStructureFromWordFileObjects(wordFileObjects);
+
+
+      /**** Build Single Production File ****/
+      const productionFileName = `2 - all words and definitions.ogg`;
+      const finalSaveFolderPath: string = path.join(audioParentFolderPath, this.sentence.folderName);
+      const fullSavePath = `${finalSaveFolderPath}/${productionFileName}`;
+
+      this.combineAndSave(
+         finalAudioStructure
+         , fullSavePath
+         , undefined
+         , productionFileName
+      )
+   }
 
 
    /* 
@@ -174,8 +212,9 @@ export default class AudioMaker {
 
 
    public async textTranslate(
-      wordPhraseSentence: string
-      , direction: translationDirection): Promise<string> {
+         wordPhraseSentence: string
+         , direction: translationDirection
+      ) : Promise<string> {
       const translationClient = new TranslationServiceClient();
 
       // setup target and source language
@@ -209,34 +248,14 @@ export default class AudioMaker {
 
    }
    
-   protected makeForeignAudio(englishText: string) {
-      const textToSpeech = new TextToSpeechClient();
-
-      const options = {
-         input: { text: 1 }
-         , voice: { languageCode: 1, ssmlGender: 1 }
-         , audioConfig: { audioEncoding: "OGG" }
-      }
-
-   }
-
-   public async autoGetForeignSentence(
-      sentence: Sentence): Promise<ForeignPhraseDefinitionPair> {
-      const foreignTranslation = await this.textTranslate(sentence.englishVersion, translationDirection.toEnglish);
-
-      return {
-         foreignPhrase : foreignTranslation
-         , englishDefinition : sentence.englishVersion
-      }
-   }
 
    /* 
-   Asks for the foreign word
-   
-   Gets a definition, asks for confirmation or an adjustment.
-   Returns an object with the foreign word and definition pair
-   
-   Returns false if user marks "done" commands
+      Asks for the foreign word
+      
+      Gets a definition, asks for confirmation or an adjustment.
+      Returns an object with the foreign word and definition pair
+      
+      Returns false if user marks "done" commands
    */
    public async getForeignWordAndDefinition()
       : Promise<ForeignPhraseDefinitionPair | false> {
@@ -308,13 +327,15 @@ export default class AudioMaker {
       send a text-to-speech request
       catch the audio stream. Save to file
    */
-   protected async fetchAndWriteAudio(request: {
-      input : { text : string }
-      , voice : { languageCode : string, ssmlGender: voiceGender }
-      , audioConfig : { 
-         audioEncoding : "AUDIO_ENCODING_UNSPECIFIED" | "LINEAR16" | "MP3" | "OGG_OPUS" }
-   }, fileNameAndPath: string)
-      : Promise<ReturnType<typeof TextToSpeechClient.prototype.synthesizeSpeech>> {
+   protected async fetchAndWriteAudio(
+      request: {
+         input : { text : string }
+         , voice : { languageCode : string, ssmlGender: voiceGender }
+         , audioConfig : { 
+            audioEncoding : "AUDIO_ENCODING_UNSPECIFIED" | "LINEAR16" | "MP3" | "OGG_OPUS" }
+      }
+      , fileNameAndPath: string
+   ) : Promise<ReturnType<typeof TextToSpeechClient.prototype.synthesizeSpeech>> {
 
       const textToSpeech = new TextToSpeechClient();
       const writeFileAsync = util.promisify(writeFile);
@@ -325,21 +346,58 @@ export default class AudioMaker {
       }
       catch(error) { console.log(error); }
    }
-   
+
+   /* */
+   protected makeAudioStructureFromWordFileObjects(wordFiles: Array<WordFile>) {
+      const finalAudioStructure: string[] = [];
+
+      wordFiles.forEach(wordFile => {
+         // push beginningPause
+         // push audio
+         // push mid gap
+
+         const hasBeginningPause = wordFile.beforePausePadding !== 0;
+         if (hasBeginningPause) {
+            const beginningPauseFile = `${silenceFolderPath}/${wordFile.beforePausePadding}.ogg`;
+            finalAudioStructure.push(beginningPauseFile);
+         }
+
+         finalAudioStructure.push(wordFile.fullFilePath);
+
+         const hasEndingPause = wordFile.beforePausePadding !== 0;
+         if (hasEndingPause) {
+            const endingPauseFile = `${silenceFolderPath}/${wordFile.afterPausePadding}.ogg`;
+            finalAudioStructure.push(endingPauseFile);
+         }
+
+      });
+
+      return finalAudioStructure;
+   }
+
+
    /* 
-      save an array of audios to a folder
+      save an array of audios to a production folder
    */
    protected combineAndSave(
       audiosAndPauseFiles: Array<string>
       , savePath: string
-      , filePrefix: string
-   ): void {
-      const finalFileSavePath = `${savePath}/${filePrefix} - ${this.sentence.folderName}.ogg`;
+      , filePrefix?: string
+      , fileName?: string
+   ) : void {
+      let finalFileSavePath: string;
+      
+      // used to save sentence files
+      if (filePrefix) {
+         finalFileSavePath = `${savePath}/${filePrefix} - ${this.sentence.folderName}.ogg`;
+      } else {
+         finalFileSavePath = `${savePath}/${fileName}`;
+      }
 
       audioConcat(audiosAndPauseFiles)
          .concat(finalFileSavePath)
          .on("start", (command: any) => {
-            console.log(`ffmpeg build process started on file: ${finalFileSavePath}`);
+            console.log(`ffmpeg build process started on file at: ${finalFileSavePath}`);
          })
          .on("end", (output: any) => {
             console.log(`Sucessfully created file at: ${finalFileSavePath}`);
@@ -351,5 +409,134 @@ export default class AudioMaker {
          });
    }
 
+ 
+   protected buildWordDefinitionAudiosToTempFolder(
+      tempFolder: ReturnType<typeof tmp.dirSync>
+   ) : void {
+      let pairNumber: number = 1;
+
+      this.sentence.foreignPhraseDefinitionPairs.forEach(wordDefinitionPair => {
+         // prefix,
+         // numberOfRepeats
+         // setup save path and filenames
+         // save the audio files
+         // increment the counter
+
+         /**** Setup request object ****/
+         const sharedRequestOptions = {
+            voice : { ssmlGender : voiceGender.female }
+            , audioConfig : { audioEncoding : "OGG_OPUS" as audioEncoding }
+         }
+
+         const foreignWordOptions = {
+            ...sharedRequestOptions
+            , voice : {
+               ...sharedRequestOptions.voice
+               , languageCode : this.configData.languageCode
+            }
+            , input : {text: wordDefinitionPair.foreignPhrase}
+         }
+
+
+         const englishDefinitionOptions = {
+            ...sharedRequestOptions
+            , voice : {
+               ...sharedRequestOptions.voice
+               , languageCode : "en"
+            }
+            , input : {text: wordDefinitionPair.englishDefinition}
+         }
+
+         /**** Setup file names & paths ****/
+
+         // foreign words are assigned 1 in the second slot
+         // english words are assigned 2
+         // this lines them up for orderly file combination.
+         const foreignWordFileName = `${pairNumber}1 - foreign word - ${wordDefinitionPair.englishDefinition}.ogg`;
+         const foreignWordFullPath = `${tempFolder}/${foreignWordFileName}`;
+
+         const englishDefinitionFileName = `${pairNumber}2 - definition - ${wordDefinitionPair.englishDefinition}.ogg`;
+         const englishDefinitionFullPath = `${tempFolder}/${foreignWordFileName}`;
+
+
+         /**** Translate and save file based on number of repeats ****/
+         for (let i = 1; i <= this.configData.numberOfRepeats; i++) {
+            this.fetchAndWriteAudio(foreignWordOptions, foreignWordFullPath);
+            this.fetchAndWriteAudio(englishDefinitionOptions, englishDefinitionFullPath);
+   
+            /**** Increment the counter ****/
+            pairNumber += 1;   
+         }
+      });
+
+   }
+
+   protected userExited(userInput: string): boolean {
+      if (userInput === "-d" ||
+         userInput === "--done"
+      ) {
+         return true;
+      }
+
+      return false;
+   }
+
+   /* 
+      Pushes all gathered data to: this.sentence.foreignPhraseDefinitionPairs
+   */
+   protected async gatherAllForeignWordsAndDefinitionsFromUser() : Promise<void> {
+      enum sequentialAdjectives {
+         first = "first"
+         , next = "next"
+      }
+      let sequentialAdjective: sequentialAdjectives = sequentialAdjectives.first;
+      let continueLooping: boolean = true;
+
+      while (continueLooping) {
+         console.log(`Please enter the ${sequentialAdjective} foreign language word and press ENTER.`)
+         
+         if (sequentialAdjective === sequentialAdjectives.next) {
+            console.log(`Or type "--done" or "-d" (no quotes) to complete word definitions for this sentence.`);
+         }
+
+         const foreignWordUserInput: string = readLine.question();
+
+         // flip adjective after first usage
+         if (sequentialAdjective === sequentialAdjectives.first) {
+            sequentialAdjective = sequentialAdjectives.next;
+          }
+
+         /**** Exit Check ****/
+         const userExited: boolean = this.userExited(foreignWordUserInput);
+
+         if (userExited) {
+            continueLooping = false;
+         }
+         else {
+            /**** Fetch a Google Translation ****/
+            const googlesuggestedTranslation: string = await this.textTranslate(foreignWordUserInput, translationDirection.toEnglish);
+
+            /**** Ask user to accept, or override the default translation ****/
+            let acceptedDefinition;
+
+            console.log(`The translation returned by Google for ${foreignWordUserInput} is: ${googlesuggestedTranslation}`);
+            console.log(`Press ENTER (without entering any text) to accept this translation. Or, type your own and press ENTER and your custom translation will be used instead.`);
+
+            const definitonUserInput = readLine.question();
+            if (definitonUserInput === "") {
+               acceptedDefinition = googlesuggestedTranslation;
+            } else {
+               acceptedDefinition = definitonUserInput;
+            }
+
+            const wordDefinitionPair: ForeignPhraseDefinitionPair = {
+               foreignPhrase : foreignWordUserInput
+               , englishDefinition : acceptedDefinition
+            };
+
+            this.sentence.foreignPhraseDefinitionPairs.push(wordDefinitionPair);
+         }
+      }
+   }
 
 }

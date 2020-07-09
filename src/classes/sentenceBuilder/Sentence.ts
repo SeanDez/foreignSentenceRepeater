@@ -1,13 +1,13 @@
 import foresignWordDefinitionPair from "./ForeignPhraseDefinitionPairInterface";
-import ForeignWordDefinitionPair from "./ForeignPhraseDefinitionPairInterface";
+import ForeignPhraseDefinitionPair from "./ForeignPhraseDefinitionPairInterface";
 
 export default class Sentence {
    // --------------- Properties
 
    public englishVersion: string;
    public folderName: string;
-   public foreignWordDefinitionPairs: ForeignWordDefinitionPair[]= []; 
-   public foreignWordCount: number = this.foreignWordDefinitionPairs.length;
+   public foreignPhraseDefinitionPairs: ForeignPhraseDefinitionPair[]= []; 
+   public foreignWordCount: number = this.foreignPhraseDefinitionPairs.length;
 
 
    // --------------- Constructor

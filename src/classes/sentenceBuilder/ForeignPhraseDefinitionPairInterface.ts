@@ -1,5 +1,5 @@
 
-export default interface ForeignWordDefinitionPair {
+export default interface ForeignPhraseDefinitionPair {
    foreignPhrase: string
    , englishDefinition: string
 }
