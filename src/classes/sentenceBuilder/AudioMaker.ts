@@ -23,11 +23,13 @@ export default class AudioMaker {
    private configData: ConfigData
    private sentence: Sentence;
 
+   
    // --------------- Constructor
    constructor(configData: ConfigData, sentence: Sentence) {
       this.configData = configData;
       this.sentence = sentence;
    }
+
 
    // --------------- Public Methods
 

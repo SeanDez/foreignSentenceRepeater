@@ -53,7 +53,8 @@ export default class BuildOrchestrator {
       
    }
 
-   public printCountOfValidSentences() {
+
+   public printCountOfValidSentences(): void {
       console.log(`${this.qualifiedSentences} valid sentences (more than one character long) were found and parsed.`);
    }
 

@@ -75,23 +75,24 @@ export default class ArgumentParser {
             buildOrchestrator.printCountOfValidSentences();
 
             // print instructions for usage
-            const setupWizard = new SetupWizard([new BuildOverview]);
+            const buildOverview = new BuildOverview();
+            buildOverview.explain();
+            buildOverview.prompt();
+
 
             // runs build process on all qualified sentences
             buildOrchestrator.qualifiedSentences.forEach(sentence => {
-               if (sentence !== undefined) {
-                  const folderExists = buildOrchestrator.checkForExistingFolder(sentence);
+               const folderExists = buildOrchestrator.checkForExistingFolder(sentence);
 
-                  if (folderExists === false) {
-                     buildOrchestrator.makeFolderAndAudioFile(sentence);
-                  }   
-               }
+               if (folderExists === false) {
+                  buildOrchestrator.makeFolderAndAudioFile(sentence);
+               }   
             });
 
 
-            console.log(`Your foreign translation audio course has been built. Happy learning! 
+            console.log(`Your foreign audio course has been built in the "/audioCourse" subfolder of the project root. Happy learning! 
 
-You can add more sentences or phrases at any time and rerun the build process to add to your course.`)
+PS: You can add more sentences or phrases to "sentences.txt" at any time, and rerun the build process to add more practice audios to your course.`)
 
             break;
          }
