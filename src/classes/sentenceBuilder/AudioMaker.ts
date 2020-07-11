@@ -20,12 +20,12 @@ const {TranslationServiceClient} = require('@google-cloud/translate');
 
 export default class AudioMaker {
    // --------------- Properties
-   private configData: ConfigData
+   private configData: Readonly<ConfigData>;
    private sentence: Sentence;
 
    
    // --------------- Constructor
-   constructor(configData: ConfigData, sentence: Sentence) {
+   constructor(configData: Readonly<ConfigData>, sentence: Sentence) {
       this.configData = configData;
       this.sentence = sentence;
    }
@@ -328,12 +328,12 @@ export default class AudioMaker {
       catch the audio stream. Save to file
    */
    protected async fetchAndWriteAudio(
-      request: {
+      request: Readonly<{
          input : { text : string }
          , voice : { languageCode : string, ssmlGender: voiceGender }
          , audioConfig : { 
             audioEncoding : "AUDIO_ENCODING_UNSPECIFIED" | "LINEAR16" | "MP3" | "OGG_OPUS" }
-      }
+      }>
       , fileNameAndPath: string
    ) : Promise<ReturnType<typeof TextToSpeechClient.prototype.synthesizeSpeech>> {
 
@@ -378,21 +378,21 @@ export default class AudioMaker {
 
    /* 
       save an array of audios to a production folder
+
+      argument 3 takes a prefix, or full filename/extension
    */
    protected combineAndSave(
       audiosAndPauseFiles: Array<string>
       , savePath: string
-      , fileNameOptions : {
-         prefix?: string
-         , name?: string
-      }
+      , fileNameOptions : 
+         Pick<{name: string, prefix: string}, "prefix"> |
+         Pick<{name: string, prefix: string}, "name">
    ) : void {
-      const {prefix, name} = fileNameOptions;
       let finalFileSavePath: string;
       
       // used to save sentence files
-      if (prefix) {
-         finalFileSavePath = `${savePath}/${prefix} - ${this.sentence.folderName}.ogg`;
+      if ("prefix" in fileNameOptions) {
+         finalFileSavePath = `${savePath}/${fileNameOptions.prefix!} - ${this.sentence.folderName}.ogg`;
       } else {
          finalFileSavePath = `${savePath}/${name}`;
       }
