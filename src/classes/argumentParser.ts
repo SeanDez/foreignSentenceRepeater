@@ -97,12 +97,12 @@ PS: You can add more sentences or phrases to "sentences.txt" at any time, and re
             break;
          }
 
-         // It is expected that this case also catches undefined
+         // This case also catches undefined positional parameters
          default: {
             console.log(
 `Please run this script with the -c or --configure flag to configure your project using the setup wizard. 
 
-Or use the -b or --build flag to build the audio files and subfolders
+Or use the -b or --build flag to build the audio files and subfolders from the sentences/phrases specified in "sentences.txt" (one per line).
             
 `);
          }
