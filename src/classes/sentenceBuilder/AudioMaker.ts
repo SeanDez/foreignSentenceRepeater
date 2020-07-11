@@ -45,7 +45,7 @@ export default class AudioMaker {
    /* 
       Makes an audio of the sentence, in the sentence's subfolder
    */
-   public async makeSentenceTrack(numberOfRepeats: number, prefix: string): Promise<void> {
+   public async makeSentenceTrack(prefix: string): Promise<void> {
 
       /**** Setup Audio Options ****/
 
@@ -63,10 +63,10 @@ export default class AudioMaker {
       }
       catch(error) { 
          console.log(error); 
-         throw Error(error);
+         throw new Error(error);
       }
 
-      const foreignAudioOptions = {
+      const foreignAudioRequest = {
          ...sharedOptions
          , voice : { 
             ...sharedOptions.voice
@@ -75,9 +75,9 @@ export default class AudioMaker {
          , input : {text : foreignSentenceText}
       }
 
-      const englishText = this.sentence.englishVersion;
 
-      const englishAudioOptions = {
+      const englishText = this.sentence.englishVersion;
+      const englishAudioRequest = {
          ...sharedOptions
          , voice : { 
             ...sharedOptions.voice
@@ -86,7 +86,7 @@ export default class AudioMaker {
          , input : {text : englishText}
       }
 
-      /**** Create 1st sentence audios ****/
+      /**** Create 1st sentence audio ****/
 
       const tempFolder = tmp.dirSync({unsafeCleanup: true});
       
@@ -94,10 +94,10 @@ export default class AudioMaker {
       const foreignAudioTempPath = `${tempFolder}${foreignAudioName}`
 
       const englishAudioName = `${prefix} - ${this.sentence.folderName}.ogg`;
-      const englishAudioTempPath = `${tempFolder}${englishAudioName}`
+      const englishAudioTempPath = `${tempFolder}/${englishAudioName}`
       
-      this.fetchAndWriteAudio(foreignAudioOptions, foreignAudioTempPath);
-      this.fetchAndWriteAudio(englishAudioOptions, englishAudioTempPath);
+      this.fetchAndWriteAudio(foreignAudioRequest, foreignAudioTempPath);
+      this.fetchAndWriteAudio(englishAudioRequest, englishAudioTempPath);
       // 1 level files saved to temp folder now
 
 
@@ -113,21 +113,20 @@ export default class AudioMaker {
       let endStructure = singlePassStructure;
 
       // if repeats are > 1, add another round of sentence repeats with a (much) shorter middle pause
-      for (let i = 1; i <= numberOfRepeats - 1; i++) {
+      for (let i = 1; i <= this.configData.numberOfRepeats - 1; i++) {
          const repeatStructure = [englishAudioTempPath, twoSecondPause, foreignAudioTempPath, threeSecondPause];
 
          endStructure.concat(repeatStructure);
       }
 
       /**** Save To Production Subfolder ****/
-      
       const finalSaveFolderPath: string = path.join(audioParentFolderPath, this.sentence.folderName);
 
 
       this.combineAndSave(
          endStructure
          , finalSaveFolderPath
-         , prefix
+         , {prefix}
       )
    }
 
@@ -166,8 +165,7 @@ export default class AudioMaker {
       this.combineAndSave(
          finalAudioStructure
          , fullSavePath
-         , undefined
-         , productionFileName
+         , {name: productionFileName}
       )
    }
 
@@ -384,16 +382,19 @@ export default class AudioMaker {
    protected combineAndSave(
       audiosAndPauseFiles: Array<string>
       , savePath: string
-      , filePrefix?: string
-      , fileName?: string
+      , fileNameOptions : {
+         prefix?: string
+         , name?: string
+      }
    ) : void {
+      const {prefix, name} = fileNameOptions;
       let finalFileSavePath: string;
       
       // used to save sentence files
-      if (filePrefix) {
-         finalFileSavePath = `${savePath}/${filePrefix} - ${this.sentence.folderName}.ogg`;
+      if (prefix) {
+         finalFileSavePath = `${savePath}/${prefix} - ${this.sentence.folderName}.ogg`;
       } else {
-         finalFileSavePath = `${savePath}/${fileName}`;
+         finalFileSavePath = `${savePath}/${name}`;
       }
 
       audioConcat(audiosAndPauseFiles)

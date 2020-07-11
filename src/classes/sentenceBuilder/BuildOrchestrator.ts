@@ -45,7 +45,7 @@ export default class BuildOrchestrator {
 
       // make first sentence track
       const leadSentencePrefix = `1`;
-      audioMaker.makeSentenceTrack(this.configData.numberOfRepeats, leadSentencePrefix);
+      audioMaker.makeSentenceTrack(leadSentencePrefix);
 
       // make the final reinforcement sentence
       const repeatSentenceFileName = `3-repeat-sentence.ogg:`;
