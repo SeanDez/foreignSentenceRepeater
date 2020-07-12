@@ -66,8 +66,6 @@ export default class AudioMaker {
    public async makeSentenceTrack(prefix: string): Promise<void> {
 
       /**** Setup Audio Options ****/
-
-      // define audio options (including text)
       const sharedOptions = {
          voice : { ssmlGender : voiceGender.male }
          , audioConfig : {audioEncoding : "OGG_OPUS" as audioEncoding }
@@ -105,7 +103,6 @@ export default class AudioMaker {
       }
 
       /**** Create 1st sentence audio ****/
-
       const tempFolder = tmp.dirSync({unsafeCleanup: true});
       
       const foreignAudioName = `${prefix} - ${foreignSentenceText}.ogg`;
@@ -129,7 +126,6 @@ export default class AudioMaker {
       /**** Setup final audio file structure ****/
       const singlePassStructure = [englishAudioTempPath, pauseFilePath, foreignAudioTempPath, threeSecondPause];
 
-      // if repeats are > 1, add another round of sentence repeats with a (much) shorter middle pause
       let endStructure = singlePassStructure;
       for (let i = 1; i <= this.configData.numberOfRepeats - 1; i++) {
          const repeatStructure = [englishAudioTempPath, twoSecondPause, foreignAudioTempPath, threeSecondPause];
@@ -159,17 +155,13 @@ export default class AudioMaker {
       this.buildWordDefinitionAudiosToTempFolder(tempFolder);
 
       const tempFileNames: Array<string> = fs.readdirSync(tempFolder);
-
       
       /**** Convert from filenames to WordFile objects  ****/
-      // contains metadata for pauses, full filepaths
       const wordFileObjects: Array<WordFile> = tempFileNames.map(fileName => {
          return new WordFile(fileName, tempFolder);
       });
 
-
       /**** Setup order of files to be combined, including silences ****/
-      // use WordFile metadata to select the correct audio files and pauses
       const finalAudioOrder: string[] = this.setAudioOrderFromWordFileObjects(wordFileObjects);
 
 
@@ -197,7 +189,6 @@ export default class AudioMaker {
 
       const targetAudioFolder = path.join(audioParentFolderPath, this.sentence.folderName);
 
-      // readDirSync returns file names, not file paths
       const audioFileNames: string[] = fs.readdirSync(targetAudioFolder);
       
       const regexMatcherFromBeginning: RegExp = new RegExp(`^${prefixMatcher}`);
@@ -233,7 +224,6 @@ export default class AudioMaker {
       ) : Promise<string> {
       const translationClient = new TranslationServiceClient();
 
-      // setup target and source language
       let sourceLanguage: string;
       let targetLanguage: string;
       if (direction === translationDirection.toEnglish) {
@@ -282,7 +272,6 @@ export default class AudioMaker {
       const userHasExited = this.isDone(userInput);
       if (userHasExited) return false;
 
-      // translate foreign to english
       const foreignWord = userInput;
 
       const googleOfferedDefinition: string = await this.textTranslate(
