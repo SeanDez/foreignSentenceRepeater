@@ -110,9 +110,9 @@ export default class AudioMaker {
 
       /**** Setup final audio file structure ****/
       const singlePassStructure = [englishAudioTempPath, pauseFilePath, foreignAudioTempPath, threeSecondPause];
-      let endStructure = singlePassStructure;
 
       // if repeats are > 1, add another round of sentence repeats with a (much) shorter middle pause
+      let endStructure = singlePassStructure;
       for (let i = 1; i <= this.configData.numberOfRepeats - 1; i++) {
          const repeatStructure = [englishAudioTempPath, twoSecondPause, foreignAudioTempPath, threeSecondPause];
 
@@ -131,12 +131,11 @@ export default class AudioMaker {
    }
 
 
-   public async makeAllWordAudios(): Promise<void> {
+   public async makeWordAudioFile(): Promise<void> {
       // sets data to this.sentence.foreignPhraseDefinitionPairs
       await this.gatherAllForeignWordsAndDefinitionsFromUser();
 
       /**** Build word def audios to temp directory ****/
-      
       const tempFolder: ReturnType<typeof tmp.dirSync> = tmp.dirSync({unsafeCleanup : true});
 
       this.buildWordDefinitionAudiosToTempFolder(tempFolder);
@@ -145,16 +144,15 @@ export default class AudioMaker {
 
       
       /**** Convert from filenames to WordFile objects  ****/
-      // contains metadat for pauses, full filepaths
-      const wordFileObjects = tempFileNames.map(fileName => {
+      // contains metadata for pauses, full filepaths
+      const wordFileObjects: Array<WordFile> = tempFileNames.map(fileName => {
          return new WordFile(fileName, tempFolder);
-      })
+      });
 
 
-      /**** Structure the file order, including silences ****/
-      // use WordFile metadata to structure the audio files and pauses
-
-      const finalAudioStructure = this.makeAudioStructureFromWordFileObjects(wordFileObjects);
+      /**** Setup order of files to be combined, including silences ****/
+      // use WordFile metadata to select the correct audio files and pauses
+      const finalAudioOrder: string[] = this.setAudioOrderFromWordFileObjects(wordFileObjects);
 
 
       /**** Build Single Production File ****/
@@ -163,7 +161,7 @@ export default class AudioMaker {
       const fullSavePath = path.join(finalSaveFolderPath, productionFileName);
 
       this.combineAndSave(
-         finalAudioStructure
+         finalAudioOrder
          , fullSavePath
          , {name: productionFileName}
       )
@@ -253,6 +251,7 @@ export default class AudioMaker {
       Asks for the foreign word
       
       Gets a definition, asks for confirmation or an adjustment.
+
       Returns an object with the foreign word and definition pair
       
       Returns false if user marks "done" commands
@@ -295,7 +294,6 @@ export default class AudioMaker {
    /* 
       meant for phrase/sentence
    */
-
    private isDone(userInput: string): boolean {
       if (userInput === "-d" || userInput === "--done") {
          return true;
@@ -306,12 +304,14 @@ export default class AudioMaker {
 
    /* 
       Silence files are kept in {rootDir}/silences. 
+      
       Delays from 1 to 12 seconds are available in 1 
       second increments
 
-      ** Note: The audio combiner adds 2 seconds
+      Note: The audio combiner adds 2 seconds
    */
-   public calculatePauseDuration(wordCount: number) {
+   public calculatePauseDuration(wordCount: number)
+      : number {
       // word 1 gets 2 seconds automatically from the audio combiner.
       // this means all values are low by 2 seconds
       let pauseDuration = wordCount - 1;
@@ -347,24 +347,22 @@ export default class AudioMaker {
       catch(error) { console.log(error); }
    }
 
-   /* */
-   protected makeAudioStructureFromWordFileObjects(wordFiles: Array<WordFile>) {
+   
+   protected setAudioOrderFromWordFileObjects(wordFiles: Array<WordFile>): Array<string> {
       const finalAudioStructure: string[] = [];
 
       wordFiles.forEach(wordFile => {
-
-
-         const hasBeginningPause = wordFile.beforePausePadding !== 0;
+         const hasBeginningPause = wordFile.beforePausePadding > 0;
          if (hasBeginningPause) {
-            const beginningPauseFile = path.join(`${silenceFolderPath}`, `${wordFile.beforePausePadding}.ogg`);
+            const beginningPauseFile = path.join(silenceFolderPath, `${wordFile.beforePausePadding}.ogg`);
             finalAudioStructure.push(beginningPauseFile);
          }
 
          finalAudioStructure.push(wordFile.fullFilePath);
 
-         const hasEndingPause = wordFile.beforePausePadding !== 0;
+         const hasEndingPause = wordFile.beforePausePadding > 0;
          if (hasEndingPause) {
-            const endingPauseFile = path.join(`${silenceFolderPath}`, `${wordFile.afterPausePadding}.ogg`);
+            const endingPauseFile = path.join(silenceFolderPath, `${wordFile.afterPausePadding}.ogg`);
             finalAudioStructure.push(endingPauseFile);
          }
 
@@ -417,12 +415,6 @@ export default class AudioMaker {
       let pairNumber: number = 1;
 
       this.sentence.foreignPhraseDefinitionPairs.forEach(wordDefinitionPair => {
-         // prefix,
-         // numberOfRepeats
-         // setup save path and filenames
-         // save the audio files
-         // increment the counter
-
          /**** Setup request object ****/
          const sharedRequestOptions = {
             voice : { ssmlGender : voiceGender.female }
@@ -468,6 +460,9 @@ export default class AudioMaker {
             /**** Increment the counter ****/
             pairNumber += 1;   
          }
+
+         // increment again in preparation for next file targets
+         pairNumber++;
       });
 
    }

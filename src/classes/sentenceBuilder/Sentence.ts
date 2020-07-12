@@ -27,7 +27,7 @@ export default class Sentence {
 
    // --------------- Internal methods
 
-   protected capitalizeAllWords() {
+   protected capitalizeAllWords(): string {
       const words: string[] = this.englishVersion.split(" ");
 
       // capitalize
@@ -38,9 +38,9 @@ export default class Sentence {
       return capitalizedWords.join(" ");
    }
 
-   protected stripNonWordFolderCharacters() {
+   protected stripNonWordFolderCharacters(): string {
       let testString = this.englishVersion;
-      const allNonWordCharacters = /\W/g;
+      const allNonWordCharacters: RegExp = /\W/g;
 
       testString = testString.replace(allNonWordCharacters, "");
 

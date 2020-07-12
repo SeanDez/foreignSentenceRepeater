@@ -27,21 +27,18 @@ export default class BuildOrchestrator {
 
    /* 
       This method controls the high level creation of each subfolder, along with audio contents
-
    */
    public async makeFolderAndAudioFile(
       sentence: Sentence
       ): Promise<void> {
       
-      // make folder IF not already there
-      // start a loop to parse all foreign words and attach definitions
-         // do this in another class 
-      
       const audioMaker = new AudioMaker(this.configData, sentence);
+
+      // make folder IF not already there
       const subFolderPath = audioMaker.makeSentenceFolder();
 
       // make word definition track
-      audioMaker.makeAllWordAudios();
+      audioMaker.makeWordAudioFile();
 
       // make first sentence track
       const leadSentencePrefix = `1`;
@@ -56,6 +53,23 @@ export default class BuildOrchestrator {
 
    public printCountOfValidSentences(): void {
       console.log(`${this.qualifiedSentences} valid sentences (more than one character long) were found and parsed.`);
+   }
+
+   public parseSentenceFile(filepath = path.join(__dirname, "../../../sentences.txt")): Array<string> {
+      const sentenceCandidates = fs
+         .readFileSync(filepath)
+         .toString()
+         .split("\n");
+
+      return sentenceCandidates;
+   }
+
+
+   public checkForExistingFolder(sentence: Sentence): boolean {
+      const {folderName} = sentence;
+      const suspectFolderPath = path.join(__dirname, `../../../audioCourse`, folderName);
+
+      return fs.existsSync(suspectFolderPath);
    }
 
    // --------------- Internal Methods
@@ -96,15 +110,6 @@ export default class BuildOrchestrator {
    }
 
 
-   public parseSentenceFile(filepath = path.join(__dirname, "../../../sentences.txt")): Array<string> {
-      const sentenceCandidates = fs
-         .readFileSync(filepath)
-         .toString()
-         .split("\n");
-
-      return sentenceCandidates;
-   }
-
    /* Assigns instance property `qualifiedSentences`
       If length is greater than 1 the sentence/phrase passes 
    */
@@ -115,25 +120,19 @@ export default class BuildOrchestrator {
                return new Sentence(candidate);
             }
             
-            return null
+            return null;
          });
+
       const passedTest: Sentence[] = passedAndUndefined
          .filter((item: Sentence | null): item is Sentence => item !== undefined);
 
          
-
       if (Array.isArray(this.qualifiedSentences)) {
          return passedTest;
       }
       else {
          throw Error("Error: No qualified sentences found");
       }
-   }
-
-   public checkForExistingFolder(sentence: Sentence): boolean {
-      const {folderName} = sentence;
-
-      return fs.existsSync(path.join(__dirname, `../../../audioCourse/${folderName}`));
    }
 
 }
