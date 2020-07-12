@@ -212,7 +212,7 @@ export default class AudioMaker {
 
 
    public async textTranslate(
-         wordPhraseSentence: string
+         wordPhraseOrSentence: string
          , direction: translationDirection
       ) : Promise<string> {
       const translationClient = new TranslationServiceClient();
@@ -230,7 +230,7 @@ export default class AudioMaker {
 
       const options = {
          parent: `projects/${this.configData.projectId}`
-         , contents: [wordPhraseSentence]
+         , contents: [wordPhraseOrSentence]
          , mimeType: 'text/plain'
          , sourceLanguageCode: sourceLanguage
          , targetLanguageCode: targetLanguage
@@ -243,7 +243,7 @@ export default class AudioMaker {
       }
       catch (error) {
          console.error(error.details)
-         throw Error(error.details);
+         throw new Error(error.details);
       }
 
    }
@@ -381,12 +381,12 @@ export default class AudioMaker {
 
       argument 3 takes a prefix, or full filename/extension
    */
-   protected combineAndSave(
+   protected combineAndSave <NamingOption extends {prefix: string, name: string}> (
       audiosAndPauseFiles: Array<string>
       , savePath: string
       , fileNameOptions : 
-         Pick<{name: string, prefix: string}, "prefix"> |
-         Pick<{name: string, prefix: string}, "name">
+         Pick<NamingOption, "prefix"> |
+         Pick<NamingOption, "name">
    ) : void {
       let finalFileSavePath: string;
       
@@ -520,12 +520,12 @@ export default class AudioMaker {
             const googlesuggestedTranslation: string = await this.textTranslate(foreignWordUserInput, translationDirection.toEnglish);
 
             /**** Ask user to accept, or override the default translation ****/
-            let acceptedDefinition;
-
             console.log(`The translation returned by Google for ${foreignWordUserInput} is: ${googlesuggestedTranslation}`);
-            console.log(`Press ENTER (without entering any text) to accept this translation. Or, type your own and press ENTER and your custom translation will be used instead.`);
+            console.log(`Press ENTER (without entering any text) to accept this translation. Or, type your own custom definition, verify it is exactly as you want, and press ENTER.`);
 
             const definitonUserInput = readLine.question();
+
+            let acceptedDefinition;
             if (definitonUserInput === "") {
                acceptedDefinition = googlesuggestedTranslation;
             } else {
