@@ -196,7 +196,7 @@ export default class AudioMaker {
          const matchFound: boolean = regexMatcherFromBeginning.test(filename);
          
          return matchFound;
-      })[0]; // returns first match only!
+      })[0];
 
       const sourceFileNameAndPath = path.join(targetAudioFolder, targetFile);
       const copiedFileNameAndPath = path.join(targetAudioFolder, copiedFileName);
@@ -298,7 +298,7 @@ export default class AudioMaker {
 
 
    /* 
-      meant for phrase/sentence
+      used to exit a user input loop
    */
    private isDone(userInput: string): boolean {
       if (userInput === "-d" || userInput === "--done") {
@@ -311,7 +311,7 @@ export default class AudioMaker {
 
    /* 
       send a text-to-speech request
-      catch the audio stream. Save to file
+      catcheds the audio stream. Saves to file
    */
    protected async fetchAndWriteAudio(
       request: Readonly<{
@@ -428,9 +428,7 @@ export default class AudioMaker {
 
          /**** Setup file names & paths ****/
 
-         // foreign words are assigned 1 in the second slot
-         // english words are assigned 2
-         // this lines them up for orderly file combination.
+         // foreign words are assigned 1 in the second position. english words are assigned 2
          const foreignWordFileName = `${pairNumber}1 - foreign word - ${wordDefinitionPair.englishDefinition}.ogg`;
          const foreignWordFullPath = path.join(tempFolder, foreignWordFileName);
 
@@ -438,16 +436,14 @@ export default class AudioMaker {
          const englishDefinitionFullPath = path.join(tempFolder, foreignWordFileName);
 
 
-         /**** Translate and save file based on number of repeats ****/
+         /**** Translate and save ****/
          for (let i = 1; i <= this.configData.numberOfRepeats; i++) {
             this.fetchAndWriteAudio(foreignWordOptions, foreignWordFullPath);
             this.fetchAndWriteAudio(englishDefinitionOptions, englishDefinitionFullPath);
    
-            /**** Increment the counter ****/
             pairNumber += 1;   
          }
 
-         // increment again in preparation for next file targets
          pairNumber++;
       });
 
@@ -483,7 +479,6 @@ export default class AudioMaker {
 
          const foreignWordUserInput: string = readLine.question();
 
-         // flip adjective after first usage
          if (sequentialAdjective === sequentialAdjectives.first) {
             sequentialAdjective = sequentialAdjectives.next;
           }
@@ -495,10 +490,10 @@ export default class AudioMaker {
             continueLooping = false;
          }
          else {
-            /**** Fetch a Google Translation ****/
+            /**** Fetch Google Translation ****/
             const googlesuggestedTranslation: string = await this.textTranslate(foreignWordUserInput, translationDirection.toEnglish);
 
-            /**** Ask user to accept, or override the default translation ****/
+            /**** Ask user to accept, or override ****/
             console.log(`The translation returned by Google for ${foreignWordUserInput} is: ${googlesuggestedTranslation}`);
             console.log(`Press ENTER (without entering any text) to accept this translation. Or, type your own custom definition, and press ENTER.`);
 
