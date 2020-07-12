@@ -34,7 +34,7 @@ export default class AudioMaker {
    // --------------- Public Methods
 
    public makeSentenceFolder(): string {
-      const subfolderPath = path.join(__dirname, "../../../audioCourse/", this.sentence.folderName);
+      const subfolderPath = path.join(audioParentFolderPath, this.sentence.folderName);
 
       fs.mkdirSync(subfolderPath);
 
@@ -91,10 +91,10 @@ export default class AudioMaker {
       const tempFolder = tmp.dirSync({unsafeCleanup: true});
       
       const foreignAudioName = `${prefix} - ${foreignSentenceText}.ogg`;
-      const foreignAudioTempPath = `${tempFolder}${foreignAudioName}`
+      const foreignAudioTempPath = path.join(`${tempFolder}`, foreignAudioName);
 
       const englishAudioName = `${prefix} - ${this.sentence.folderName}.ogg`;
-      const englishAudioTempPath = `${tempFolder}/${englishAudioName}`
+      const englishAudioTempPath = path.join(tempFolder, englishAudioName);
       
       this.fetchAndWriteAudio(foreignAudioRequest, foreignAudioTempPath);
       this.fetchAndWriteAudio(englishAudioRequest, englishAudioTempPath);
@@ -105,7 +105,7 @@ export default class AudioMaker {
       // 2 for 1st word, plus 1 per word thereafter
       let mainPauseDuration: number = 2 + this.sentence.foreignWordCount;
       if (mainPauseDuration > 12) { mainPauseDuration = 12 }
-      const pauseFilePath = `${silenceFolderPath}/${mainPauseDuration}.ogg`;
+      const pauseFilePath = path.join(silenceFolderPath, `${mainPauseDuration}.ogg`);
       
 
       /**** Setup final audio file structure ****/
@@ -160,7 +160,7 @@ export default class AudioMaker {
       /**** Build Single Production File ****/
       const productionFileName = `2 - all words and definitions.ogg`;
       const finalSaveFolderPath: string = path.join(audioParentFolderPath, this.sentence.folderName);
-      const fullSavePath = `${finalSaveFolderPath}/${productionFileName}`;
+      const fullSavePath = path.join(finalSaveFolderPath, productionFileName);
 
       this.combineAndSave(
          finalAudioStructure
@@ -179,7 +179,7 @@ export default class AudioMaker {
       prefixMatcher: string
       , copiedFileName: string): void {
 
-      const targetAudioFolder = `${audioParentFolderPath}${this.sentence.folderName}`;
+      const targetAudioFolder = path.join(audioParentFolderPath, this.sentence.folderName);
 
       // readDirSync returns file names, not file paths
       const audioFileNames: string[] = fs.readdirSync(targetAudioFolder);
@@ -192,8 +192,8 @@ export default class AudioMaker {
          return matchFound;
       })[0]; // returns first match only!
 
-      const sourceFileNameAndPath = `${targetAudioFolder}/${targetFile}`;
-      const copiedFileNameAndPath = `${targetAudioFolder}/${copiedFileName}`;
+      const sourceFileNameAndPath = path.join(targetAudioFolder, targetFile);
+      const copiedFileNameAndPath = path.join(targetAudioFolder, copiedFileName);
 
       fs.copyFileSync(sourceFileNameAndPath, copiedFileNameAndPath);
    }
@@ -352,13 +352,11 @@ export default class AudioMaker {
       const finalAudioStructure: string[] = [];
 
       wordFiles.forEach(wordFile => {
-         // push beginningPause
-         // push audio
-         // push mid gap
+
 
          const hasBeginningPause = wordFile.beforePausePadding !== 0;
          if (hasBeginningPause) {
-            const beginningPauseFile = `${silenceFolderPath}/${wordFile.beforePausePadding}.ogg`;
+            const beginningPauseFile = path.join(`${silenceFolderPath}`, `${wordFile.beforePausePadding}.ogg`);
             finalAudioStructure.push(beginningPauseFile);
          }
 
@@ -366,7 +364,7 @@ export default class AudioMaker {
 
          const hasEndingPause = wordFile.beforePausePadding !== 0;
          if (hasEndingPause) {
-            const endingPauseFile = `${silenceFolderPath}/${wordFile.afterPausePadding}.ogg`;
+            const endingPauseFile = path.join(`${silenceFolderPath}`, `${wordFile.afterPausePadding}.ogg`);
             finalAudioStructure.push(endingPauseFile);
          }
 
@@ -392,9 +390,9 @@ export default class AudioMaker {
       
       // used to save sentence files
       if ("prefix" in fileNameOptions) {
-         finalFileSavePath = `${savePath}/${fileNameOptions.prefix!} - ${this.sentence.folderName}.ogg`;
+         finalFileSavePath = path.join(savePath, `${fileNameOptions.prefix} - ${this.sentence.folderName}.ogg`);
       } else {
-         finalFileSavePath = `${savePath}/${name}`;
+         finalFileSavePath = path.join(savePath, name);
       }
 
       audioConcat(audiosAndPauseFiles)
@@ -456,10 +454,10 @@ export default class AudioMaker {
          // english words are assigned 2
          // this lines them up for orderly file combination.
          const foreignWordFileName = `${pairNumber}1 - foreign word - ${wordDefinitionPair.englishDefinition}.ogg`;
-         const foreignWordFullPath = `${tempFolder}/${foreignWordFileName}`;
+         const foreignWordFullPath = path.join(tempFolder, foreignWordFileName);
 
          const englishDefinitionFileName = `${pairNumber}2 - definition - ${wordDefinitionPair.englishDefinition}.ogg`;
-         const englishDefinitionFullPath = `${tempFolder}/${foreignWordFileName}`;
+         const englishDefinitionFullPath = path.join(tempFolder, foreignWordFileName);
 
 
          /**** Translate and save file based on number of repeats ****/
@@ -521,7 +519,7 @@ export default class AudioMaker {
 
             /**** Ask user to accept, or override the default translation ****/
             console.log(`The translation returned by Google for ${foreignWordUserInput} is: ${googlesuggestedTranslation}`);
-            console.log(`Press ENTER (without entering any text) to accept this translation. Or, type your own custom definition, verify it is exactly as you want, and press ENTER.`);
+            console.log(`Press ENTER (without entering any text) to accept this translation. Or, type your own custom definition, and press ENTER.`);
 
             const definitonUserInput = readLine.question();
 
