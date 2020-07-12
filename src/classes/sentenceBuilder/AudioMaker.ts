@@ -449,15 +449,6 @@ export default class AudioMaker {
 
    }
 
-   protected userExited(userInput: string): boolean {
-      if (userInput === "-d" ||
-         userInput === "--done"
-      ) {
-         return true;
-      }
-
-      return false;
-   }
 
    /* 
       Pushes all gathered data to: this.sentence.foreignPhraseDefinitionPairs
@@ -484,7 +475,7 @@ export default class AudioMaker {
           }
 
          /**** Exit Check ****/
-         const userExited: boolean = this.userExited(foreignWordUserInput);
+         const userExited: boolean = this.isDone(foreignWordUserInput);
 
          if (userExited) {
             continueLooping = false;
