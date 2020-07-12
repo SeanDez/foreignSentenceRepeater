@@ -33,6 +33,24 @@ export default class AudioMaker {
 
    // --------------- Public Methods
 
+   /* 
+      Silence files are kept in {rootDir}/silences. 
+      
+      Delays from 1 to 12 seconds are available in 1 
+      second increments
+
+      Note: The audio combiner adds 2 seconds
+   */
+  public calculatePauseDuration(wordCount: number)
+  : number {
+      // word 1 gets 2 seconds automatically from the audio combiner.
+      // this means all values are low by 2 seconds
+      let pauseDuration = wordCount - 1;
+      if (pauseDuration > 12) pauseDuration = 12;
+
+      return pauseDuration;
+   }
+
    public makeSentenceFolder(): string {
       const subfolderPath = path.join(audioParentFolderPath, this.sentence.folderName);
 
@@ -199,7 +217,7 @@ export default class AudioMaker {
 
    // --------------- Internal Methods
 
-   public parseFileContents(filepath = path.join(__dirname, "../../../sentences.txt")): Array<string> {
+   protected parseFileContents(filepath = path.join(__dirname, "../../../sentences.txt")): Array<string> {
       const sentenceCandidates = fs
          .readFileSync(filepath)
          .toString()
@@ -209,7 +227,7 @@ export default class AudioMaker {
    }
 
 
-   public async textTranslate(
+   protected async textTranslate(
          wordPhraseOrSentence: string
          , direction: translationDirection
       ) : Promise<string> {
@@ -256,7 +274,7 @@ export default class AudioMaker {
       
       Returns false if user marks "done" commands
    */
-   public async getForeignWordAndDefinition()
+   protected async getForeignWordAndDefinition()
       : Promise<ForeignPhraseDefinitionPair | false> {
       console.log("Please copy and paste the (next) foreign word in the sentence here. Or type -d or --done when all words in the sentence have been specified.")
       const userInput = readLine.question();
@@ -302,26 +320,6 @@ export default class AudioMaker {
       return false;
    }
 
-   /* 
-      Silence files are kept in {rootDir}/silences. 
-      
-      Delays from 1 to 12 seconds are available in 1 
-      second increments
-
-      Note: The audio combiner adds 2 seconds
-   */
-   public calculatePauseDuration(wordCount: number)
-      : number {
-      // word 1 gets 2 seconds automatically from the audio combiner.
-      // this means all values are low by 2 seconds
-      let pauseDuration = wordCount - 1;
-      if (pauseDuration > 12) pauseDuration = 12;
-
-      return pauseDuration;
-   }
-
-
-   // --------------- Internal Methods
 
    /* 
       send a text-to-speech request
