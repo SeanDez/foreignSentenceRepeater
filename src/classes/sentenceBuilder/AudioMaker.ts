@@ -113,7 +113,6 @@ export default class AudioMaker {
       
       this.fetchAndWriteAudio(foreignAudioRequest, foreignAudioTempPath);
       this.fetchAndWriteAudio(englishAudioRequest, englishAudioTempPath);
-      // 1 level files saved to temp folder now
 
 
       /**** Add Pause ****/
