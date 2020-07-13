@@ -16,16 +16,12 @@ import BuildOverview from "./setupWizard/BuildOverview";
 import BuildOrchestrator from "./sentenceBuilder/BuildOrchestrator";
 import Sentence from "./sentenceBuilder/Sentence";
 
-
 export default class ArgumentParser {
    protected commandLineArgs: string[];
 
    constructor(argV: string[]) {
-      this.commandLineArgs = argV;
+     this.commandLineArgs = argV;
    }
-
-   // ---------------  Public Methods
-
 
    // ---------------  Helpers
 
@@ -104,8 +100,9 @@ PS: You can add more sentences or phrases to "sentences.txt" at any time, and re
 
 Or use the -b or --build flag to build the audio files and subfolders from the sentences/phrases specified in "sentences.txt" (one per line).
             
-`);
-         }
-      }
+`,
+         );
+       }
+     }
    }
 }
