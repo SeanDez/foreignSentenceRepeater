@@ -1,19 +1,17 @@
-import BuildOrchestrator from "../BuildOrchestrator";
+import BuildOrchestrator from '../BuildOrchestrator';
 
 class BuildOrchExposed extends BuildOrchestrator {
-   
-   public parseSentenceFileExp() {
-      return this.parseSentenceFile();
-   }
+  public parseSentenceFileExp() {
+    return this.parseSentenceFile();
+  }
 
-   public validateSentenceCandidatesExp() {
-      return;
-   }
+  public validateSentenceCandidatesExp() {
+
+  }
 }
 
-test("parseSentenceFile()", () => {
-   // setup
-   const buildOrchExposed = new BuildOrchExposed();
-   buildOrchExposed.parseSentenceFileExp();
-
+test('parseSentenceFile()', () => {
+  // setup
+  const buildOrchExposed = new BuildOrchExposed();
+  buildOrchExposed.parseSentenceFileExp();
 });

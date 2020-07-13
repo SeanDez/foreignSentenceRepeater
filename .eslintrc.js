@@ -1,6 +1,6 @@
 module.exports = {
   env: {
-    browser: true,
+    browser: false,
     es2020: true,
   },
   extends: [
@@ -15,5 +15,14 @@ module.exports = {
     '@typescript-eslint',
   ],
   rules: {
+    'import/extensions': 0, // off
+  },
+  settings: {
+    'import/resolver': {
+      node: {
+        extensions: ['.ts'],
+        moduleDirectory: ['node_modules', 'src'],
+      },
+    },
   },
 };

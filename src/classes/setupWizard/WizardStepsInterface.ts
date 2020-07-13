@@ -1,4 +1,4 @@
-import ConfigData from "./ConfigDataInterface";
+import ConfigData from './ConfigDataInterface';
 
 /* Null means "absence of value" and best fits
 */
@@ -13,11 +13,3 @@ export default interface WizardSteps {
    , validateInput(userInput?: string | undefined): boolean
    , validateFile?(filePath?: string | undefined): boolean | void
 }
-
-
-
-
-
-
-
-

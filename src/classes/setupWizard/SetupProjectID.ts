@@ -1,10 +1,11 @@
-import StepsBase from "./StepsBase";
-import WizardSteps from "./WizardStepsInterface";
-import ConfigData from "./ConfigDataInterface";
+import StepsBase from './StepsBase';
+import WizardSteps from './WizardStepsInterface';
+import ConfigData from './ConfigDataInterface';
 
 export default class SetupProjectID extends StepsBase implements WizardSteps {
    public readonly hasSaveableData: boolean = true;
-   public readonly configDataKey: keyof ConfigData = "projectId";
+
+   public readonly configDataKey: keyof ConfigData = 'projectId';
 
    protected header: string = `
 *************************************  
@@ -24,27 +25,26 @@ export default class SetupProjectID extends StepsBase implements WizardSteps {
    That is an invalid project ID. Valid IDs are all lowercase letters, numbers, and hyphens. They start with a letter, and are 6 to 30 characters in length.
    `;
 
-   /**** Duck Typed Methods ****/
+   /** ** Duck Typed Methods *** */
 
    public validateInput(rawUserInput: string): boolean {
-      const upperCaseRegex: RegExp = /[A-Z]/;
-      const hasUpperCaseChar: boolean = upperCaseRegex.test(rawUserInput);
+     const upperCaseRegex: RegExp = /[A-Z]/;
+     const hasUpperCaseChar: boolean = upperCaseRegex.test(rawUserInput);
 
-      const hasNonWordCharBesidesHyphen: boolean = (/[^\w-]/.test(rawUserInput));
+     const hasNonWordCharBesidesHyphen: boolean = (/[^\w-]/.test(rawUserInput));
 
-      const startsWithLetter = (/[a-z]/.test(rawUserInput[0]));
+     const startsWithLetter = (/[a-z]/.test(rawUserInput[0]));
 
-      const tooShort = rawUserInput.length <= 5;
-      const tooLong = rawUserInput.length >= 31;
+     const tooShort = rawUserInput.length <= 5;
+     const tooLong = rawUserInput.length >= 31;
 
-      if (startsWithLetter === false ||
-         hasNonWordCharBesidesHyphen || hasUpperCaseChar ||
-         tooShort || tooLong
-         ) {
-            return false;
-         }
+     if (startsWithLetter === false
+         || hasNonWordCharBesidesHyphen || hasUpperCaseChar
+         || tooShort || tooLong
+     ) {
+       return false;
+     }
 
-      return true;
+     return true;
    }
-
 }

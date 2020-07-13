@@ -1,6 +1,5 @@
-import StepsBase from "./StepsBase";
-import WizardSteps from "./WizardStepsInterface";
-
+import StepsBase from './StepsBase';
+import WizardSteps from './WizardStepsInterface';
 
 export default class InstallFfMpeg extends StepsBase implements WizardSteps {
    protected readonly header: string = `
@@ -20,5 +19,5 @@ Installation options for Windows, Mac, and Linux are available, but can change. 
 Mac and Windows users: Please check Google for a good recent guide on how to install FFmpeg on your machine. 
 `
 
-   public promptMessage: string = `Press any key to continue after you have installed FFmpeg.`;
+   public promptMessage: string = 'Press any key to continue after you have installed FFmpeg.';
 }

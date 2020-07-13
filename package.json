@@ -5,6 +5,7 @@
   "main": "compiled/index.js",
   "scripts": {
     "test": "node_modules/jest/bin/jest.js --watch"
+    , "fix:eslint" : "node_modules/eslint/bin/eslint.js --fix --ext .ts ."
   },
   "keywords": [],
   "author": "",

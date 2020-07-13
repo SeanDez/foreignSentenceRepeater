@@ -1,5 +1,5 @@
-import StepsBase from "./StepsBase";
-import WizardSteps from "./WizardStepsInterface";
+import StepsBase from './StepsBase';
+import WizardSteps from './WizardStepsInterface';
 
 export default class EnableApis extends StepsBase implements WizardSteps {
    protected readonly header: string = `
@@ -29,16 +29,15 @@ Please go to the following pages and click the "Enable" button on each one:
 "enabled" (without quotes) was not entered.
 `;
 
-   /**** Duck Typed Methods ****/
+   /** ** Duck Typed Methods *** */
 
    public validateInput(rawUserInput: string): boolean {
-      const normalizedInput = rawUserInput.trim().toLowerCase();
+     const normalizedInput = rawUserInput.trim().toLowerCase();
 
-      if (normalizedInput === "enabled") {
-         return true;
-      }
+     if (normalizedInput === 'enabled') {
+       return true;
+     }
 
-      return false;
+     return false;
    }
-
 }

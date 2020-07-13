@@ -1,9 +1,9 @@
-import StepsBase from "./StepsBase";
-import WizardSteps from "./WizardStepsInterface";
-import readLine from "readline-sync";
+import readLine from 'readline-sync';
+import StepsBase from './StepsBase';
+import WizardSteps from './WizardStepsInterface';
 
 export default class Overview extends StepsBase implements WizardSteps {
-   /**** Properties ****/
+   /** ** Properties *** */
    public readonly hasSaveableData: boolean = false;
 
    protected readonly description: string = `
@@ -28,16 +28,14 @@ All audio files are saved in .ogg format.
    
 `;
 
-
-   /**** Duck Typed Methods ****/
+   /** ** Duck Typed Methods *** */
 
    public explain(): void {
-      console.log(this.header);
-      console.log(this.description);
+     console.log(this.header);
+     console.log(this.description);
    }
 
    public prompt() {
-      return readLine.question(this.promptMessage);
+     return readLine.question(this.promptMessage);
    }
-
 }

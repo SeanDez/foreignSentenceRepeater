@@ -1,11 +1,13 @@
-import WizardSteps from "./WizardStepsInterface";
-import StepsBase from "./StepsBase";
-import { isNumber } from "util";
-import ConfigData from "./ConfigDataInterface";
+import { isNumber } from 'util';
+import WizardSteps from './WizardStepsInterface';
+import StepsBase from './StepsBase';
+import ConfigData from './ConfigDataInterface';
 
 export default class SelectLanguage extends StepsBase implements WizardSteps {
    public readonly hasSaveableData: boolean = true;
-   public readonly configDataKey: keyof ConfigData = "numberOfRepeats";
+
+   public readonly configDataKey: keyof ConfigData = 'numberOfRepeats';
+
    private maxRepeats: number = 30;
 
    public readonly header: string = `
@@ -13,6 +15,7 @@ export default class SelectLanguage extends StepsBase implements WizardSteps {
     SELECT REPETITIONS PER PLAYTHROUGH
 ******************************************
    `
+
    public readonly description: string = `In a single playthrough, the generated file will play the following in sequence:
    
 1. The sentence in English, and then in the target language.
@@ -32,23 +35,20 @@ However, any value from 1 to ${this.maxRepeats} may be selected.
    public readonly invalidInputMessage: string = `Invalid value. Please enter a value between 1 and ${this.maxRepeats}
    `;
 
-
-   /**** Duck Typed methods ****/
+   /** ** Duck Typed methods *** */
 
    public validateInput(userInput: string) {
-      // coerce to number. Then check if the number is between 1 and maxRepeats
-      const numberSuspect = Number(userInput);
-      const isNumber = Number.isNaN(numberSuspect) === false;
+     // coerce to number. Then check if the number is between 1 and maxRepeats
+     const numberSuspect = Number(userInput);
+     const isNumber = Number.isNaN(numberSuspect) === false;
 
-      if (isNumber && 
-         numberSuspect > 0 && 
-         numberSuspect <= this.maxRepeats
-         ) {
-            return true;
-         }
+     if (isNumber
+         && numberSuspect > 0
+         && numberSuspect <= this.maxRepeats
+     ) {
+       return true;
+     }
 
-      return false;
+     return false;
    }
-
-
 }

@@ -1,11 +1,10 @@
-import StepsBase from "./StepsBase";
-import WizardSteps from "./WizardStepsInterface";
-
-import readLine from "readline-sync";
+import readLine from 'readline-sync';
+import StepsBase from './StepsBase';
+import WizardSteps from './WizardStepsInterface';
 
 export default class BuildOverview extends StepsBase implements WizardSteps {
-   // --------------- Instance Properties
-   
+  // --------------- Instance Properties
+
    protected readonly header: string = `
 ***********************************   
        AUDIO BUILDER WIZARD
@@ -27,5 +26,4 @@ You can type "quit" or "exit" at any time to exit the build wizard before finish
 
    protected readonly promptMessage: string = `Press ENTER to begin word selection and definition...
    `
-
 }
