@@ -49,8 +49,8 @@ export function parseFileContents(filepath = path.join(__dirname, '../../../sent
 }
 
 /*
-      used to exit a user input loop
-   */
+  used to exit a user input loop
+*/
 export function isDone(userInput: string): boolean {
   if (userInput === '-d' || userInput === '--done') {
     return true;

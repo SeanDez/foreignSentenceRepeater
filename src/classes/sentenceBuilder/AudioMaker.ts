@@ -53,7 +53,6 @@ export default class AudioMaker {
   */
   public async makeSentenceTrack(prefix: string): Promise<void> {
     /** ** Setup Audio Options *** */
-
     let foreignSentenceText;
     try {
       foreignSentenceText = await this.textTranslate(
@@ -61,7 +60,6 @@ export default class AudioMaker {
         translationDirection.toForeign,
       );
     } catch (error) {
-      console.log(error);
       throw new Error(error);
     }
 
@@ -204,7 +202,6 @@ export default class AudioMaker {
       const { translations }: { translations: string[] } = response;
       return translations[0];
     } catch (error) {
-      console.error(error.details);
       throw new Error(error.details);
     }
   }
