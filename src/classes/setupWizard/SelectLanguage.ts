@@ -25,10 +25,13 @@ export default class SelectLanguage extends StepsBase implements WizardSteps {
 
    // --------------- Duck Typed Methods
 
-   /* Always returns true. But gives a warning message if input is not found in the internal list (below)
+   /* Always returns true. But gives a warning message
+    if input is not found in the internal list (below)
    */
    public validateInput(userInput: string): true {
-     const matchFound: boolean = this.validLanguageCodes.some((singleCode) => singleCode === userInput);
+     const matchFound: boolean = this.validLanguageCodes.some(
+       (singleCode) => singleCode === userInput,
+     );
 
      if (matchFound === false) {
        console.log(`

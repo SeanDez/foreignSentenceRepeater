@@ -7,7 +7,7 @@ import ConfigData from '../setupWizard/ConfigDataInterface';
 
 // --------------- Standalone functions
 
-function parseSentenceFile(filepath = path.join(__dirname, '../../../sentences.txt')): Array<string> {
+export function parseSentenceFile(filepath = path.join(__dirname, '../../../sentences.txt')): Array<string> {
   const sentenceCandidates = fs
     .readFileSync(filepath)
     .toString()

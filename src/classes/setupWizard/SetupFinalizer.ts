@@ -63,8 +63,7 @@ Configuration settings saved.
        );
 
        console.log(
-         `\"sentences.txt\" has been created in the project root.
-            `,
+         '"sentences.txt" has been created in the project root.',
        );
 
        return true;

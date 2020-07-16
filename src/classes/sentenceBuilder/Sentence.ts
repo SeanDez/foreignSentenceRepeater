@@ -1,4 +1,3 @@
-import foresignWordDefinitionPair from './ForeignPhraseDefinitionPairInterface';
 import ForeignPhraseDefinitionPair from './ForeignPhraseDefinitionPairInterface';
 
 export default class Sentence {

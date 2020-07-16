@@ -40,9 +40,9 @@ However, any value from 1 to ${this.maxRepeats} may be selected.
    public validateInput(userInput: string) {
      // coerce to number. Then check if the number is between 1 and maxRepeats
      const numberSuspect = Number(userInput);
-     const isNumber = Number.isNaN(numberSuspect) === false;
+     const isANumber = Number.isNaN(numberSuspect) === false;
 
-     if (isNumber
+     if (isANumber
          && numberSuspect > 0
          && numberSuspect <= this.maxRepeats
      ) {

@@ -8,7 +8,8 @@
        , "outDir": "compiled/"
        , "esModuleInterop": true
        , "strict": true
+       , "typeRoots": ["./src/types", "node_modules/@types"]
    },
    "include": ["src/**/*"]
-   , "exclude": ["node_modules", "compiled", "__tests__"]
+   , "exclude": ["node_modules", "compiled", "__tests__", "types"]
 }

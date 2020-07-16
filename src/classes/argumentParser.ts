@@ -15,87 +15,85 @@ import BuildOverview from './setupWizard/BuildOverview';
 import BuildOrchestrator, { checkForExistingFolder } from './sentenceBuilder/BuildOrchestrator';
 
 export default class ArgumentParser {
-   protected commandLineArgs: string[];
+  constructor(protected commandLineArgs: string[]) {
+    this.commandLineArgs = commandLineArgs;
+  }
 
-   constructor(argV: string[]) {
-     this.commandLineArgs = argV;
-   }
+  // ---------------  Helpers
 
-   // ---------------  Helpers
+  public parse() {
+    // look for a flag in position 1
+    // first two args are always "node" and {path}
+    const arg1 = this.commandLineArgs[2];
 
-   public parse() {
-     // look for a flag in position 1
-     // first two args are always "node" and {path}
-     const arg1 = this.commandLineArgs[2];
+    switch (arg1) {
+      case '-c':
+      case '--configure': {
+        // run setup wizard
+        const setupWizard: InstanceType<typeof SetupWizard> = new SetupWizard([
+          new ConfigOverview(),
+          new InstallFfMpeg(),
+          new SetupRole(),
+          new SetupProjectID(),
+          new EnableApis(),
+          new SelectLanguage(),
+          new SelectRepeatCount(),
+        ]);
 
-     switch (arg1) {
-       case '-c':
-       case '--configure': {
-         // run setup wizard
-         const setupWizard: InstanceType<typeof SetupWizard> = new SetupWizard([
-           new ConfigOverview(),
-           new InstallFfMpeg(),
-           new SetupRole(),
-           new SetupProjectID(),
-           new EnableApis(),
-           new SelectLanguage(),
-           new SelectRepeatCount(),
-         ]);
+        // instruct on google cloud setup, gather config data
+        const configData = setupWizard.initialSetup();
 
-         // instruct on google cloud setup, gather config data
-         const configData = setupWizard.initialSetup();
+        // save & create files
+        const setupFinalizer = new SetupFinalizer();
+        const successfulSave: boolean = setupFinalizer.save(configData);
+        const sentenceFileCreated: boolean = setupFinalizer.createSentenceFile();
 
-         // save & create files
-         const setupFinalizer = new SetupFinalizer();
-         const successfulSave: boolean = setupFinalizer.save(configData);
-         const sentenceFileCreated: boolean = setupFinalizer.createSentenceFile();
+        // print final instructions
+        if (successfulSave && sentenceFileCreated) {
+          setupFinalizer.printFinalInstructions();
+        }
 
-         // print final instructions
-         if (successfulSave && sentenceFileCreated) {
-           setupFinalizer.printFinalInstructions();
-         }
+        break;
+      }
 
-         break;
-       }
+      case '-b':
+      case '--build': {
+        // parses sentence file for qualified sentences on instantiation
+        const buildOrchestrator = new BuildOrchestrator();
 
-       case '-b':
-       case '--build': {
-         // parses sentence file for qualified sentences on instantiation
-         const buildOrchestrator = new BuildOrchestrator();
+        buildOrchestrator.printCountOfValidSentences();
 
-         buildOrchestrator.printCountOfValidSentences();
+        // print instructions for usage
+        const buildOverview = new BuildOverview();
+        buildOverview.explain();
+        buildOverview.prompt();
 
-         // print instructions for usage
-         const buildOverview = new BuildOverview();
-         buildOverview.explain();
-         buildOverview.prompt();
+        // runs build process on all qualified sentences
+        buildOrchestrator.qualifiedSentences.forEach(async (sentence) => {
+          const folderExists = checkForExistingFolder(sentence);
 
-         // runs build process on all qualified sentences
-         buildOrchestrator.qualifiedSentences.forEach(async (sentence) => {
-           const folderExists = checkForExistingFolder(sentence);
+          if (folderExists === false) {
+            await buildOrchestrator.makeFolderAndAudioFile(sentence);
+          }
+        });
 
-           if (folderExists === false) {
-             await buildOrchestrator.makeFolderAndAudioFile(sentence);
-           }
-         });
-
-         console.log(`Your foreign audio course has been built in the "/audioCourse" subfolder of the project root. Happy learning! 
+        console.log(`Your foreign audio course has been built in the "/audioCourse" subfolder of the project root. Happy learning! 
 
 PS: You can add more sentences or phrases to "sentences.txt" at any time, and rerun the build process to add more practice audios to your course.`);
 
-         break;
-       }
+        break;
+      }
 
-       // This case also catches undefined positional parameters
-       default: {
-         console.log(
-           `Please run this script with the -c or --configure flag to configure your project using the setup wizard. 
+      // This case also catches undefined positional parameters
+      default: {
+        console.log(
+          `Please run this script with the -c or --configure flag to configure your project using the setup wizard. 
 
 Or use the -b or --build flag to build the audio files and subfolders from the sentences/phrases specified in "sentences.txt" (one per line).
             
 `,
-         );
-       }
-     }
-   }
+        );
+      }
+    }
+  }
 }

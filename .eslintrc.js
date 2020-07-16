@@ -15,7 +15,14 @@ module.exports = {
     '@typescript-eslint',
   ],
   rules: {
-    'import/extensions': 0, // off
+    // ESLint doesn't understand these for Typescript
+    // TSC will throw on errors though
+    'import/named': 0, // off
+    'import/no-unrseolved': 0,
+    'import/extensions': 0,
+    'no-undef': 0,
+    'no-unused-vars': 0,
+    'no-console': 0, // needed for this CLI app
   },
   settings: {
     'import/resolver': {
