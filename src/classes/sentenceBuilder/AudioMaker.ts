@@ -21,7 +21,7 @@ import {
 
 import {
   parseFileContents, isDone, fetchAndWriteAudio, createAudioRequest,
-  setAudioOrderFromWordFileObjects,
+  setAudioOrderFromWordFileObjects, calculateMainPauseDuration,
 } from '../../helpers/AudioMakerHelpers';
 
 const { TranslationServiceClient } = require('@google-cloud/translate');
@@ -73,7 +73,7 @@ export default class AudioMaker {
     );
 
     /** ** Create 1st sentence audio *** */
-    const tempFolder = tmp.dirSync({ unsafeCleanup: true }).name;
+    const tempFolder: string = tmp.dirSync({ unsafeCleanup: true }).name;
 
     const foreignAudioName = `${prefix} - ${foreignSentenceText}.ogg`;
     const foreignAudioTempPath = path.join(`${tempFolder}`, foreignAudioName);
@@ -86,8 +86,7 @@ export default class AudioMaker {
 
     /** ** Add Pause *** */
     // 2 for 1st word, plus 1 per word thereafter
-    let mainPauseDuration: number = 2 + this.sentence.foreignWordCount;
-    if (mainPauseDuration > 12) { mainPauseDuration = 12; }
+    const mainPauseDuration: number = calculateMainPauseDuration(this.sentence.foreignWordCount);
     const pauseFilePath = path.join(silenceFolderPath, `${mainPauseDuration}.ogg`);
 
     /** ** Setup final audio file structure *** */

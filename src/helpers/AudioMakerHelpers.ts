@@ -29,7 +29,7 @@ const sharedAudioRequestOptions = {
 
    Note: The audio combiner adds 2 seconds
 */
-export function calculatePauseDuration(wordCount: number)
+export function calculateMainPauseDuration(wordCount: number)
 : number {
   // word 1 gets 2 seconds automatically from the audio combiner.
   // this means all values are low by 2 seconds
