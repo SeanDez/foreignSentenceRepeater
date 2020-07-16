@@ -66,12 +66,12 @@ export default class AudioMaker {
     }
 
     const foreignAudioRequest = createAudioRequest(
-      this.configData.languageCode, foreignSentenceText,
+      this.configData.languageCode, foreignSentenceText, voiceGender.male,
     );
 
     const englishText = this.sentence.englishVersion;
     const englishAudioRequest = createAudioRequest(
-      'en', englishText,
+      'en', englishText, voiceGender.male,
     );
 
     /** ** Create 1st sentence audio *** */
@@ -293,29 +293,14 @@ export default class AudioMaker {
     let pairNumber: number = 1;
 
     this.sentence.foreignPhraseDefinitionPairs.forEach((wordDefinitionPair) => {
-      /** ** Setup request object *** */
-      const sharedRequestOptions = {
-        voice: { ssmlGender: voiceGender.female },
-        audioConfig: { audioEncoding: 'OGG_OPUS' as audioEncoding },
-      };
+      /** ** Setup request objects *** */
+      const foreignAudioRequest = createAudioRequest(
+        this.configData.languageCode, wordDefinitionPair.foreignPhrase, voiceGender.female,
+      );
 
-      const foreignWordOptions = {
-        ...sharedRequestOptions,
-        voice: {
-          ...sharedRequestOptions.voice,
-          languageCode: this.configData.languageCode,
-        },
-        input: { text: wordDefinitionPair.foreignPhrase },
-      };
-
-      const englishDefinitionOptions = {
-        ...sharedRequestOptions,
-        voice: {
-          ...sharedRequestOptions.voice,
-          languageCode: 'en',
-        },
-        input: { text: wordDefinitionPair.englishDefinition },
-      };
+      const englishAudioRequest = createAudioRequest(
+        'en', wordDefinitionPair.englishDefinition, voiceGender.female,
+      );
 
       /** ** Setup file names & paths *** */
 
@@ -328,8 +313,8 @@ export default class AudioMaker {
 
       /** ** Translate and save *** */
       for (let i = 1; i <= this.configData.numberOfRepeats; i += 1) {
-        fetchAndWriteAudio(foreignWordOptions, foreignWordFullPath);
-        fetchAndWriteAudio(englishDefinitionOptions, englishDefinitionFullPath);
+        fetchAndWriteAudio(foreignAudioRequest, foreignWordFullPath);
+        fetchAndWriteAudio(englishAudioRequest, englishDefinitionFullPath);
 
         pairNumber += 1;
       }

@@ -16,7 +16,6 @@ import WordFile from '../classes/sentenceBuilder/WordFile';
 // --------------- Shared Options for Audio Request
 
 const sharedAudioRequestOptions = {
-  voice: { ssmlGender: voiceGender.male },
   audioConfig: { audioEncoding: 'OGG_OPUS' as audioEncoding },
 };
 
@@ -102,11 +101,12 @@ export function setAudioOrderFromWordFileObjects(wordFiles: Array<WordFile>): Ar
 export function createAudioRequest(
   languageCode: string,
   translationText: string,
+  gender: voiceGender,
 ) {
   const audioRequest: AudioRequest = {
     ...sharedAudioRequestOptions,
     voice: {
-      ...sharedAudioRequestOptions.voice,
+      ssmlGender: gender,
       languageCode,
     },
     input: { text: translationText },
