@@ -12,6 +12,7 @@ import Sentence from './Sentence';
 import Utilities from '../Utilities';
 import ConfigData from '../setupWizard/ConfigDataInterface';
 import ForeignPhraseDefinitionPair from './ForeignPhraseDefinitionPairInterface';
+import AudioRequest from './AudioRequestInterface';
 import { translationDirection, voiceGender, audioEncoding } from '../minorTypes';
 import WordFile, { contentTypes } from './WordFile';
 
@@ -21,6 +22,13 @@ import {
 } from '../../globals';
 
 const { TranslationServiceClient } = require('@google-cloud/translate');
+
+// --------------- Shared Options for Audio Request
+
+const sharedAudioRequestOptions = {
+  voice: { ssmlGender: voiceGender.male },
+  audioConfig: { audioEncoding: 'OGG_OPUS' as audioEncoding },
+};
 
 // --------------- Standalone functions
 
@@ -67,12 +75,7 @@ function isDone(userInput: string): boolean {
     catches the audio stream. Saves to file
  */
 async function fetchAndWriteAudio(
-  request: Readonly<{
-       input : { text : string }
-       , voice : { languageCode : string, ssmlGender: voiceGender }
-       , audioConfig : {
-          audioEncoding : 'AUDIO_ENCODING_UNSPECIFIED' | 'LINEAR16' | 'MP3' | 'OGG_OPUS' }
-    }>,
+  request: Readonly<AudioRequest>,
   fileNameAndPath: string,
 ) : Promise<ReturnType<typeof TextToSpeechClient.prototype.synthesizeSpeech>> {
   const textToSpeech = new TextToSpeechClient();
@@ -106,6 +109,22 @@ function setAudioOrderFromWordFileObjects(wordFiles: Array<WordFile>): Array<str
   return finalAudioStructure;
 }
 
+function createAudioRequest(
+  languageCode: string,
+  translationText: string,
+) {
+  const audioRequest: AudioRequest = {
+    ...sharedAudioRequestOptions,
+    voice: {
+      ...sharedAudioRequestOptions.voice,
+      languageCode,
+    },
+    input: { text: translationText },
+  };
+
+  return audioRequest;
+}
+
 // --------------- Main Class
 
 export default class AudioMaker {
@@ -133,10 +152,6 @@ export default class AudioMaker {
   */
   public async makeSentenceTrack(prefix: string): Promise<void> {
     /** ** Setup Audio Options *** */
-    const sharedOptions = {
-      voice: { ssmlGender: voiceGender.male },
-      audioConfig: { audioEncoding: 'OGG_OPUS' as audioEncoding },
-    };
 
     let foreignSentenceText;
     try {
@@ -149,24 +164,14 @@ export default class AudioMaker {
       throw new Error(error);
     }
 
-    const foreignAudioRequest = {
-      ...sharedOptions,
-      voice: {
-        ...sharedOptions.voice,
-        languageCode: this.configData.languageCode,
-      },
-      input: { text: foreignSentenceText },
-    };
+    const foreignAudioRequest = createAudioRequest(
+      this.configData.languageCode, foreignSentenceText,
+    );
 
     const englishText = this.sentence.englishVersion;
-    const englishAudioRequest = {
-      ...sharedOptions,
-      voice: {
-        ...sharedOptions.voice,
-        languageCode: 'en',
-      },
-      input: { text: englishText },
-    };
+    const englishAudioRequest = createAudioRequest(
+      'en', englishText,
+    );
 
     /** ** Create 1st sentence audio *** */
     const tempFolder = tmp.dirSync({ unsafeCleanup: true }).name;
