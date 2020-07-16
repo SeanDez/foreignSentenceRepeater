@@ -1,4 +1,4 @@
-import { voiceGender } from '../minorTypes';
+import { voiceGender } from '../helpers/minorTypes';
 
 export default interface AudioRequest {
   input : { text : string }

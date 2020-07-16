@@ -1,8 +1,7 @@
-import fs, { writeFile } from 'fs';
+import fs from 'fs';
 import path from 'path';
 import util from 'util';
 import readLine from 'readline-sync';
-import { TextToSpeechClient } from '@google-cloud/text-to-speech';
 import tmp from 'tmp';
 
 // @ts-ignore
@@ -12,8 +11,7 @@ import Sentence from './Sentence';
 import Utilities from '../Utilities';
 import ConfigData from '../setupWizard/ConfigDataInterface';
 import ForeignPhraseDefinitionPair from './ForeignPhraseDefinitionPairInterface';
-import AudioRequest from './AudioRequestInterface';
-import { translationDirection, voiceGender, audioEncoding } from '../minorTypes';
+import { translationDirection, voiceGender, audioEncoding } from '../../helpers/minorTypes';
 import WordFile, { contentTypes } from './WordFile';
 
 import {
@@ -21,109 +19,12 @@ import {
   threeSecondPause, fourSecondPause, fiveSecondPause,
 } from '../../globals';
 
+import {
+  parseFileContents, isDone, fetchAndWriteAudio, createAudioRequest,
+  setAudioOrderFromWordFileObjects,
+} from '../../helpers/AudioMakerHelpers';
+
 const { TranslationServiceClient } = require('@google-cloud/translate');
-
-// --------------- Shared Options for Audio Request
-
-const sharedAudioRequestOptions = {
-  voice: { ssmlGender: voiceGender.male },
-  audioConfig: { audioEncoding: 'OGG_OPUS' as audioEncoding },
-};
-
-// --------------- Standalone functions
-
-/*
-   Silence files are kept in {rootDir}/silences.
-
-   Delays from 1 to 12 seconds are available in 1
-   second increments
-
-   Note: The audio combiner adds 2 seconds
-*/
-function calculatePauseDuration(wordCount: number)
-: number {
-  // word 1 gets 2 seconds automatically from the audio combiner.
-  // this means all values are low by 2 seconds
-  let pauseDuration = wordCount - 1;
-  if (pauseDuration > 12) pauseDuration = 12;
-
-  return pauseDuration;
-}
-
-function parseFileContents(filepath = path.join(__dirname, '../../../sentences.txt')): Array<string> {
-  const sentenceCandidates = fs
-    .readFileSync(filepath)
-    .toString()
-    .split('\n');
-
-  return sentenceCandidates;
-}
-
-/*
-      used to exit a user input loop
-   */
-function isDone(userInput: string): boolean {
-  if (userInput === '-d' || userInput === '--done') {
-    return true;
-  }
-
-  return false;
-}
-
-/*
-    send a text-to-speech request
-    catches the audio stream. Saves to file
- */
-async function fetchAndWriteAudio(
-  request: Readonly<AudioRequest>,
-  fileNameAndPath: string,
-) : Promise<ReturnType<typeof TextToSpeechClient.prototype.synthesizeSpeech>> {
-  const textToSpeech = new TextToSpeechClient();
-  const writeFileAsync = util.promisify(writeFile);
-
-  try {
-    const [audioResponse] = await textToSpeech.synthesizeSpeech(request);
-    await writeFileAsync(fileNameAndPath, audioResponse.audioContent!);
-  } catch (error) { console.log(error); }
-}
-
-function setAudioOrderFromWordFileObjects(wordFiles: Array<WordFile>): Array<string> {
-  const finalAudioStructure: string[] = [];
-
-  wordFiles.forEach((wordFile) => {
-    const hasBeginningPause = wordFile.beforePausePadding > 0;
-    if (hasBeginningPause) {
-      const beginningPauseFile = path.join(silenceFolderPath, `${wordFile.beforePausePadding}.ogg`);
-      finalAudioStructure.push(beginningPauseFile);
-    }
-
-    finalAudioStructure.push(wordFile.fullFilePath);
-
-    const hasEndingPause = wordFile.beforePausePadding > 0;
-    if (hasEndingPause) {
-      const endingPauseFile = path.join(silenceFolderPath, `${wordFile.afterPausePadding}.ogg`);
-      finalAudioStructure.push(endingPauseFile);
-    }
-  });
-
-  return finalAudioStructure;
-}
-
-function createAudioRequest(
-  languageCode: string,
-  translationText: string,
-) {
-  const audioRequest: AudioRequest = {
-    ...sharedAudioRequestOptions,
-    voice: {
-      ...sharedAudioRequestOptions.voice,
-      languageCode,
-    },
-    input: { text: translationText },
-  };
-
-  return audioRequest;
-}
 
 // --------------- Main Class
 
@@ -259,16 +160,17 @@ export default class AudioMaker {
 
     const regexMatcherFromBeginning: RegExp = new RegExp(`^${prefixMatcher}`);
 
-    const targetFile: string = audioFileNames.filter((filename) => {
-      const matchFound: boolean = regexMatcherFromBeginning.test(filename);
+    const targetFile: string | undefined = audioFileNames.find(
+      (filename) => regexMatcherFromBeginning.test(filename),
+    );
 
-      return matchFound;
-    })[0];
-
-    const sourceFileNameAndPath = path.join(targetAudioFolder, targetFile);
+    let sourceFileNameAndPath: string;
+    if (typeof targetFile !== 'undefined') {
+      sourceFileNameAndPath = path.join(targetAudioFolder, targetFile);
+    }
     const copiedFileNameAndPath = path.join(targetAudioFolder, copiedFileName);
 
-    fs.copyFileSync(sourceFileNameAndPath, copiedFileNameAndPath);
+    fs.copyFileSync(sourceFileNameAndPath!, copiedFileNameAndPath);
   }
 
   // --------------- Internal Methods
@@ -467,6 +369,7 @@ export default class AudioMaker {
           continueLooping = false;
         } else {
           /** ** Fetch Google Translation *** */
+          /* eslint-disable no-await-in-loop */
           const googlesuggestedTranslation: string = await this.textTranslate(
             foreignWordUserInput, translationDirection.toEnglish,
           );

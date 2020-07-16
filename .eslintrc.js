@@ -22,7 +22,7 @@ module.exports = {
     'import/extensions': 0,
     'no-undef': 0,
     'no-unused-vars': 0,
-    'no-console': 0, // needed for this CLI app
+    'no-console': 0, // used heavily for CLIor offering suggestions from an API
   },
   settings: {
     'import/resolver': {
