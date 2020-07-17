@@ -5,7 +5,8 @@ export enum contentTypes { foreignWord, englishDefinition }
 
    The metadata will be used in an AutoMaker subprocess to stiche together the audio file correctly
 
-   Properties needed: content type (foreign / definition), pauseAdjustments before/after, middle pause
+   Properties needed: content type (foreign / definition), pauseAdjustment
+   before/after, middle pause
 */
 export default class WordFile {
    // --------------- Properties

@@ -85,7 +85,6 @@ export default class AudioMaker {
     fetchAndWriteAudio(englishAudioRequest, englishAudioTempPath);
 
     /** ** Add Pause *** */
-    // 2 for 1st word, plus 1 per word thereafter
     const mainPauseDuration: number = calculateMainPauseDuration(this.sentence.foreignWordCount);
     const pauseFilePath = path.join(silenceFolderPath, `${mainPauseDuration}.ogg`);
 

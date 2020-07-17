@@ -4,19 +4,35 @@
    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
    "version": "0.2.0",
    "configurations": [
-
       {
          "type": "node",
          "request": "launch",
-         "name": "Launch Debugger/Program",
+         "name": "-c",
          "skipFiles": [
             "<node_internals>/**"
          ],
          "program": "${workspaceFolder}/compiled/index.js -c",
-         "preLaunchTask": "tsc: build - tsconfig.json",
+         "preLaunchTask": "tsc",
          "outFiles": [
             "${workspaceFolder}/compiled/**/*.js"
-         ]
+         ],
+         "sourceMaps": true,
+         "smartStep": true,
+      }, {
+         "type": "node",
+         "request": "launch",
+         "name": "-b",
+         "skipFiles": [
+            "<node_internals>/**"
+         ],
+         "program": "${workspaceFolder}/compiled/index.js",
+         // "preLaunchTask": "tsc",
+         "outFiles": [
+            "${workspaceFolder}/compiled/**/*.js"
+         ],
+         "sourceMaps": true,
+         "smartStep": true,
+         "internalConsoleOptions": "openOnSessionStart"
       }
    ]
 }

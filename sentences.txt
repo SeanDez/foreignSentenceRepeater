@@ -1,1 +1,2 @@
-Put all sentences (and phrases) to be translated here, one per line.
+this is the first sentence.
+second sentence line is here
