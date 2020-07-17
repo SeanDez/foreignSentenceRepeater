@@ -12,7 +12,7 @@
             "<node_internals>/**"
          ],
          "program": "${workspaceFolder}/compiled/index.js -c",
-         "preLaunchTask": "tsc",
+         // "preLaunchTask": "tsc",
          "outFiles": [
             "${workspaceFolder}/compiled/**/*.js"
          ],
