@@ -11,8 +11,9 @@
          "skipFiles": [
             "<node_internals>/**"
          ],
-         "program": "${workspaceFolder}/compiled/index.js -c",
+         "program": "${workspaceFolder}/compiled/index.js",
          // "preLaunchTask": "tsc",
+         "args": ["-c"],
          "outFiles": [
             "${workspaceFolder}/compiled/**/*.js"
          ],
@@ -27,6 +28,7 @@
          ],
          "program": "${workspaceFolder}/compiled/index.js",
          // "preLaunchTask": "tsc",
+         "args": ["-b"],
          "outFiles": [
             "${workspaceFolder}/compiled/**/*.js"
          ],
