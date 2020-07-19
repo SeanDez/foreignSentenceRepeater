@@ -1,5 +1,21 @@
 import ForeignPhraseDefinitionPair from './ForeignPhraseDefinitionPairInterface';
 
+// --------------- Standalone Functions
+
+export function capitalizeAllWords(words: string[]): string {
+  const capitalizedWords = words.map((word) => word[0].toUpperCase() + word.substring(1));
+
+  return capitalizedWords.join(' ');
+}
+
+export function stripNonWordFolderCharacters(sentence: string): string {
+  const allNonWordCharacters: RegExp = /\W/g;
+  const updatedSentence = sentence.replace(allNonWordCharacters, '');
+  return updatedSentence;
+}
+
+// --------------- Main Class
+
 export default class Sentence {
   // --------------- Properties
 
@@ -19,30 +35,12 @@ export default class Sentence {
      this.folderName = this.buildFolderName();
    }
 
-   public buildFolderName(): string {
-     const capitalized = this.capitalizeAllWords();
-     const noUnsafeCharacters = this
-       .stripNonWordFolderCharacters();
-     return noUnsafeCharacters;
-   }
-
    // --------------- Internal methods
 
-   protected capitalizeAllWords(): string {
+   protected buildFolderName(): string {
      const words: string[] = this.englishVersion.split(' ');
-
-     // capitalize
-     const capitalizedWords = words.map((word) => word[0].toUpperCase() + word.substring(1));
-
-     return capitalizedWords.join(' ');
-   }
-
-   protected stripNonWordFolderCharacters(): string {
-     let testString = this.englishVersion;
-     const allNonWordCharacters: RegExp = /\W/g;
-
-     testString = testString.replace(allNonWordCharacters, '');
-
-     return testString;
+     const capitalized = capitalizeAllWords(words);
+     const noUnsafeCharacters = stripNonWordFolderCharacters(capitalized);
+     return noUnsafeCharacters;
    }
 }

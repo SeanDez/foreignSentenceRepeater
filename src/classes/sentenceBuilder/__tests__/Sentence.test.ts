@@ -1,29 +1,34 @@
-import Sentence from '../Sentence';
+import Sentence, { capitalizeAllWords, stripNonWordFolderCharacters } from '../Sentence';
 
 class SentenceExt extends Sentence {
   // implicit super call and argument passage
 
-  public stripNonWordFolderCharactersExt() {
-    return this.stripNonWordFolderCharacters();
-  }
-
-  public capitalizeAllWordsExt() {
-    return this.capitalizeAllWords();
+  public buildFolderName() {
+    return super.buildFolderName();
   }
 }
 
 test('capitalize all words', () => {
-  const sentenceObj = new SentenceExt('this is_my++teSt String!!! Another sentence here.');
+  const words = 'this is_my++teSt String!!! Another sentence here.'.split(' ');
 
-  const capitalized = sentenceObj.capitalizeAllWordsExt();
+  const capitalized = capitalizeAllWords(words);
 
   expect(capitalized).toStrictEqual('This Is_my++teSt String!!! Another Sentence Here.');
 });
 
 test('stripNonWordFolderCharactersExt', () => {
-  const sentenceObj = new SentenceExt('This Is _My ++TeSt String!!! Another Sentence Here.');
+  const sentence = new SentenceExt('This Is _My ++TeSt String!!! Another Sentence Here.');
 
-  const stripped = sentenceObj.stripNonWordFolderCharactersExt();
+  const stripped = stripNonWordFolderCharacters(sentence.englishVersion);
 
   expect(stripped).toStrictEqual('ThisIs_MyTeStStringAnotherSentenceHere');
+});
+
+test('buildFolderName', () => {
+  const sentence = new SentenceExt('This is the test sentence string');
+
+  const result = sentence.folderName;
+  console.log('result', result);
+
+  expect(result).toStrictEqual('ThisIsTheTestSentenceString');
 });
