@@ -23,14 +23,12 @@ export function checkForExistingFolder(sentence: Sentence): boolean {
   return fs.existsSync(suspectFolderPath);
 }
 
-function setConfigData(): ConfigData {
-  // read config file
-  const configData = JSON.parse(
-    path.join(__dirname,
-      '../../../configuration.json'),
-  );
+const defaultConfigFilePath = path.join(__dirname, '../../../configuration.json');
 
-  // set it to the config property
+export function setConfigData(configFile = defaultConfigFilePath): ConfigData {
+  const fileContents = fs.readFileSync(configFile, 'utf-8');
+  const configData: ConfigData = JSON.parse(fileContents);
+
   const moddedConfig: Partial<{
       languageCode: string
       , numberOfRepeats: number
@@ -38,13 +36,13 @@ function setConfigData(): ConfigData {
      if (currentKey === 'numberOfRepeats') {
        return {
          ...moddedObject,
-         currentKey: Number(configData[currentKey]),
+         [currentKey as keyof ConfigData]: Number(configData[currentKey]),
        };
      }
 
      return {
        ...moddedObject,
-       currentKey: configData[currentKey],
+       [currentKey as keyof ConfigData]: configData[currentKey as keyof ConfigData],
      };
    }, {});
 

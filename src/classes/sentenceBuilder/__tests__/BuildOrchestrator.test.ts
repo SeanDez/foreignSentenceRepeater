@@ -1,4 +1,4 @@
-import BuildOrchestrator, { parseSentenceFile } from '../BuildOrchestrator';
+import BuildOrchestrator, { parseSentenceFile, setConfigData } from '../BuildOrchestrator';
 
 class BuildOrchExposed extends BuildOrchestrator {
 

@@ -64,9 +64,11 @@ export default class ArgumentParser {
         buildOrchestrator.printCountOfValidSentences();
 
         // print instructions for usage
-        const buildOverview = new BuildOverview();
-        buildOverview.explain();
-        buildOverview.prompt();
+        // todo turn this on later
+
+        // const buildOverview = new BuildOverview();
+        // buildOverview.explain();
+        // buildOverview.prompt();
 
         // runs build process on all qualified sentences
         buildOrchestrator.qualifiedSentences.forEach(async (sentence) => {
