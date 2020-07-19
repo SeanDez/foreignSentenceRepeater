@@ -43,6 +43,7 @@ function setConfigData(): ConfigData {
      }
 
      return {
+       ...moddedObject,
        currentKey: configData[currentKey],
      };
    }, {});

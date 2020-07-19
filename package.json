@@ -5,7 +5,9 @@
   "main": "compiled/index.js",
   "scripts": {
     "test": "node_modules/jest/bin/jest.js --watch",
-    "fix:eslint": "node_modules/eslint/bin/eslint.js --fix --ext .ts ."
+    "fix:eslint": "node_modules/eslint/bin/eslint.js --fix --ext .ts .",
+    "app:configure": "node compiled/index.js -c",
+    "app:build": "node compiled/index.js -b"
   },
   "keywords": [],
   "author": "",
@@ -26,6 +28,8 @@
     "eslint-config-airbnb-base": "^14.2.0",
     "eslint-plugin-import": "^2.22.0",
     "jest": "^26.0.1",
+    "nodemon": "^2.0.4",
+    "source-map-support": "^0.5.19",
     "ts-jest": "^26.0.0",
     "typescript": "^3.9.3"
   },
