@@ -75,7 +75,6 @@ export default class BuildOrchestrator {
 
      audioMaker.makeSentenceFolder();
 
-     // made word/definition track
      audioMaker.makeWordAudioFile();
 
      // make first sentence track
@@ -88,7 +87,7 @@ export default class BuildOrchestrator {
    }
 
    public printCountOfValidSentences(): void {
-     console.log(`${this.qualifiedSentences} valid sentences (more than one character long) were found and parsed.`);
+     console.log(`${this.qualifiedSentences.length} valid sentences (more than one character long) were found and parsed.`);
    }
 
    // --------------- Internal Methods
