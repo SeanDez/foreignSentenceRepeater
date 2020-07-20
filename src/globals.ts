@@ -1,8 +1,8 @@
 import path from 'path';
 
-export const audioParentFolderPath = path.join(__dirname, '../../../audioCourse');
+export const audioParentFolderPath = path.join(__dirname, '../audioCourse');
 
-export const silenceFolderPath = path.join(__dirname, '../../../silences');
+export const silenceFolderPath = path.join(__dirname, '../silences');
 
 export const oneSecondPause = path.join(`${silenceFolderPath}`, '1.ogg');
 export const twoSecondPause = path.join(`${silenceFolderPath}`, '2.ogg');

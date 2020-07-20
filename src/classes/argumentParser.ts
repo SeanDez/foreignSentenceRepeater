@@ -13,6 +13,7 @@ import BuildOverview from './setupWizard/BuildOverview';
 
 // build related
 import BuildOrchestrator, { checkForExistingFolder } from './sentenceBuilder/BuildOrchestrator';
+import Sentence from './sentenceBuilder/Sentence';
 
 export default class ArgumentParser {
   constructor(protected commandLineArgs: string[]) {
@@ -71,8 +72,8 @@ export default class ArgumentParser {
         // buildOverview.prompt();
 
         // runs build process on all qualified sentences
-        buildOrchestrator.qualifiedSentences.forEach(async (sentence) => {
-          const folderExists = checkForExistingFolder(sentence);
+        buildOrchestrator.qualifiedSentences.forEach(async (sentence: Sentence) => {
+          const folderExists: boolean = checkForExistingFolder(sentence);
 
           if (folderExists === false) {
             await buildOrchestrator.makeFolderAndAudioFile(sentence);

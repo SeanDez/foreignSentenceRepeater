@@ -44,6 +44,7 @@ export default class AudioMaker {
     const subfolderPath = path.join(audioParentFolderPath, this.sentence.folderName);
 
     fs.mkdirSync(subfolderPath);
+    console.log('subfolderPath', subfolderPath);
 
     return subfolderPath;
   }

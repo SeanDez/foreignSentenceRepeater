@@ -72,7 +72,7 @@ export default class BuildOrchestrator {
      sentence: Sentence,
    ): Promise<void> {
      const audioMaker = new AudioMaker(this.configData, sentence);
-
+     console.log('about to make sentence folder....');
      audioMaker.makeSentenceFolder();
 
      audioMaker.makeWordAudioFile();
