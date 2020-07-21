@@ -44,8 +44,6 @@
             "<node_internals>/**"
          ],
          "program": "${workspaceFolder}/node_modules/jest/bin/jest.js",
-         // "preLaunchTask": "tsc",
-         "args": [""],
          "outFiles": [
             "${workspaceFolder}/compiled/**/*.js"
          ],
