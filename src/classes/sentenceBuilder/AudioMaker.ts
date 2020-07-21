@@ -16,7 +16,7 @@ import WordFile, { contentTypes } from './WordFile';
 
 import {
   audioParentFolderPath, silenceFolderPath, oneSecondPause, twoSecondPause,
-  threeSecondPause, fourSecondPause, fiveSecondPause,
+  threeSecondPause, fourSecondPause, fiveSecondPause, googleApiKeyFilePath
 } from '../../globals';
 
 import {
@@ -24,6 +24,7 @@ import {
   setAudioOrderFromWordFileObjects, calculateMainPauseDuration,
 } from '../../helpers/AudioMakerHelpers';
 
+const { Translate } = require('@google-cloud/translate').v2;
 const { TranslationServiceClient } = require('@google-cloud/translate');
 
 // --------------- Main Class
@@ -176,7 +177,10 @@ export default class AudioMaker {
     wordPhraseOrSentence: string,
     direction: translationDirection,
   ) : Promise<string> {
-    const translationClient = new TranslationServiceClient();
+    const basicTranslate = new Translate({
+      projectId: 'foreignsentencerepeater',
+      keyFilename: googleApiKeyFilePath,
+    });
 
     let sourceLanguage: string;
     let targetLanguage: string;
@@ -188,20 +192,20 @@ export default class AudioMaker {
       targetLanguage = this.configData.languageCode;
     }
 
-    const options = {
-      parent: `projects/${this.configData.projectId}`,
-      contents: [wordPhraseOrSentence],
-      mimeType: 'text/plain',
-      sourceLanguageCode: sourceLanguage,
-      targetLanguageCode: targetLanguage,
+    const requestOptions = {
+      target: targetLanguage,
+      source: sourceLanguage,
     };
 
     try {
-      const [response] = await translationClient.translateText(options);
-      const { translations }: { translations: string[] } = response;
+      let [translations] = await basicTranslate.translate(
+        wordPhraseOrSentence, requestOptions,
+      );
+
+      translations = Array.isArray(translations) ? translations : [translations];
       return translations[0];
     } catch (error) {
-      throw new Error(error.details);
+      throw new Error(error);
     }
   }
 
@@ -331,12 +335,15 @@ export default class AudioMaker {
       let continueLooping: boolean = true;
 
       while (continueLooping) {
+        console.log('Current Sentence:');
+        console.log(`${this.sentence.englishVersion}`);
+
         console.log(`Please enter the ${sequentialAdjective} foreign language word and press ENTER.`);
 
         if (sequentialAdjective === sequentialAdjectives.next) {
           console.log('Or type "--done" or "-d" (no quotes) to complete word definitions for this sentence.');
         }
-
+        console.log('sequentialAdjective', sequentialAdjective);
         const foreignWordUserInput: string = readLine.question();
 
         if (sequentialAdjective === sequentialAdjectives.first) {
@@ -345,25 +352,30 @@ export default class AudioMaker {
 
         /** ** Exit Check *** */
         const userExited: boolean = isDone(foreignWordUserInput);
+        console.log('userExited', userExited);
 
         if (userExited) {
           continueLooping = false;
+          console.log('the userExited branch');
         } else {
+          console.log('the else branch'); // it's like it stops working here
+
           /** ** Fetch Google Translation *** */
           /* eslint-disable no-await-in-loop */
-          const googlesuggestedTranslation: string = await this.textTranslate(
+          const googleSuggestedTranslation: string = await this.textTranslate(
             foreignWordUserInput, translationDirection.toEnglish,
           );
+          console.log('googleSuggestedTranslation', googleSuggestedTranslation);
 
           /** ** Ask user to accept, or override *** */
-          console.log(`The translation returned by Google for ${foreignWordUserInput} is: ${googlesuggestedTranslation}`);
+          console.log(`The translation returned by Google for ${foreignWordUserInput} is: ${googleSuggestedTranslation}`);
           console.log('Press ENTER (without entering any text) to accept this translation. Or, type your own custom definition, and press ENTER.');
 
           const definitonUserInput = readLine.question();
 
           let acceptedDefinition;
           if (definitonUserInput === '') {
-            acceptedDefinition = googlesuggestedTranslation;
+            acceptedDefinition = googleSuggestedTranslation;
           } else {
             acceptedDefinition = definitonUserInput;
           }

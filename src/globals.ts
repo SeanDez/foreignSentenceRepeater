@@ -1,5 +1,7 @@
 import path from 'path';
 
+export const googleApiKeyFilePath = path.join(__dirname, '../googleCredentials.json');
+
 export const audioParentFolderPath = path.join(__dirname, '../audioCourse');
 
 export const silenceFolderPath = path.join(__dirname, '../silences');

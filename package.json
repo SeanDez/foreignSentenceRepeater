@@ -5,7 +5,7 @@
   "main": "compiled/index.js",
   "scripts": {
     "test": "node_modules/jest/bin/jest.js --watch",
-    "test:one": "node_modules/jest/bin/jest.js",
+    "test:once": "node_modules/jest/bin/jest.js",
     "fix:eslint": "node_modules/eslint/bin/eslint.js --fix --ext .ts .",
     "app:configure": "node compiled/index.js -c",
     "app:build": "node compiled/index.js -b"

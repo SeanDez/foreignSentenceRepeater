@@ -28,7 +28,6 @@ test('buildFolderName', () => {
   const sentence = new SentenceExt('This is the test sentence string');
 
   const result = sentence.folderName;
-  console.log('result', result);
 
   expect(result).toStrictEqual('ThisIsTheTestSentenceString');
 });
