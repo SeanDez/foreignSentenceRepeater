@@ -16,7 +16,7 @@ import WordFile, { contentTypes } from './WordFile';
 
 import {
   audioParentFolderPath, silenceFolderPath, oneSecondPause, twoSecondPause,
-  threeSecondPause, fourSecondPause, fiveSecondPause, googleApiKeyFilePath
+  threeSecondPause, fourSecondPause, fiveSecondPause, googleApiKeyFilePath,
 } from '../../globals';
 
 import {
@@ -192,18 +192,14 @@ export default class AudioMaker {
       targetLanguage = this.configData.languageCode;
     }
 
-    const requestOptions = {
-      target: targetLanguage,
-      source: sourceLanguage,
-    };
-
     try {
       let [translations] = await basicTranslate.translate(
-        wordPhraseOrSentence, requestOptions,
+        wordPhraseOrSentence, targetLanguage,
       );
 
       translations = Array.isArray(translations) ? translations : [translations];
-      return translations[0];
+
+      return translations[0].normalize();
     } catch (error) {
       throw new Error(error);
     }

@@ -16,16 +16,21 @@ class AudioMakerAllPublic extends AudioMaker {
   }
 }
 
+/*
+  This is an API test and therefore a slow integration test
+
+  Keep it skipped unless testing of the API is specifically desired
+*/
 test('textTranslate (gcloud integration)', async () => {
   const audioMaker = new AudioMakerAllPublic(dummyConfigData, testSentence);
   const translationResult = await audioMaker.textTranslate('test string', translationDirection.toForeign);
 
-  // works but doesn't match
-  // expect(translationResult).toEqual('ฮารดโคด');
+  // returns exact match but jest can not detect it correctly
+  // expect(translationResult).toEqual('สตรงการทดสอบ');
 
-  const translationResult2 = await audioMaker.textTranslate('ฮารดโคด', translationDirection.toEnglish);
+  const translationResult2 = await audioMaker.textTranslate('สตริงการทดสอบ', translationDirection.toEnglish);
 
-  expect(translationResult2).toStrictEqual('test string 2');
+  expect(translationResult2).toStrictEqual('Test string');
 });
 
 test.skip('gatherAllForeignWordsAndDefinitionsFromUser', () => {
