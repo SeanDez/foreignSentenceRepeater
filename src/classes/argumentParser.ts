@@ -76,7 +76,7 @@ export default class ArgumentParser {
           const folderExists: boolean = checkForExistingFolder(sentence);
 
           if (folderExists === false) {
-            await buildOrchestrator.makeFolderAndAudioFile(sentence);
+            await buildOrchestrator.makeFolderAndAudioFiles(sentence);
           }
         });
 

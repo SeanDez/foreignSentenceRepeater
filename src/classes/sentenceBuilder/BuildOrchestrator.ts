@@ -68,18 +68,18 @@ export default class BuildOrchestrator {
    /*
       This method controls the high level creation of each subfolder, along with audio contents
    */
-   public async makeFolderAndAudioFile(
+   public async makeFolderAndAudioFiles(
      sentence: Sentence,
    ): Promise<void> {
      const audioMaker = new AudioMaker(this.configData, sentence);
      console.log('about to make sentence folder....');
      audioMaker.makeSentenceFolder();
 
-     audioMaker.makeWordAudioFile();
+     await audioMaker.makeWordAudioFiles();
 
      // make first sentence track
      const leadSentencePrefix = '1';
-     audioMaker.makeSentenceTrack(leadSentencePrefix);
+     await audioMaker.makeSentenceTrack(leadSentencePrefix);
 
      // make the final reinforcement sentence
      const repeatSentenceFileName = '3-repeat-sentence.ogg:';

@@ -27,6 +27,8 @@ import {
 const { Translate } = require('@google-cloud/translate').v2;
 const { TranslationServiceClient } = require('@google-cloud/translate');
 
+require('dotenv').config();
+
 // --------------- Main Class
 
 export default class AudioMaker {
@@ -112,7 +114,7 @@ export default class AudioMaker {
     );
   }
 
-  public async makeWordAudioFile(): Promise<void> {
+  public async makeWordAudioFiles(): Promise<void> {
     // sets data to this.sentence.foreignPhraseDefinitionPairs
     await this.gatherAllForeignWordsAndDefinitionsFromUser();
 
@@ -178,7 +180,7 @@ export default class AudioMaker {
     direction: translationDirection,
   ) : Promise<string> {
     const basicTranslate = new Translate({
-      projectId: 'foreignsentencerepeater',
+      projectId: this.configData.projectId || process.env.GOOGLE_PROJECT_ID,
       keyFilename: googleApiKeyFilePath,
     });
 
@@ -330,9 +332,13 @@ export default class AudioMaker {
       let sequentialAdjective: sequentialAdjectives = sequentialAdjectives.first;
       let continueLooping: boolean = true;
 
+      const sentenceInForeignLanguage: string = await this.textTranslate(
+        this.sentence.englishVersion, translationDirection.toForeign,
+      );
+
       while (continueLooping) {
-        console.log('Current Sentence:');
-        console.log(`${this.sentence.englishVersion}`);
+        console.log(`Current Sentence, ENGLISH: ${this.sentence.englishVersion}`);
+        console.log(`Current Sentence, FOREIGN: ${sentenceInForeignLanguage}`);
 
         console.log(`Please enter the ${sequentialAdjective} foreign language word and press ENTER.`);
 
