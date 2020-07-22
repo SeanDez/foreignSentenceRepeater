@@ -1,8 +1,9 @@
-import fs from 'fs';
+import fs, { writeFile } from 'fs';
 import path from 'path';
 import util from 'util';
 import readLine from 'readline-sync';
 import tmp from 'tmp';
+import { TextToSpeechClient } from '@google-cloud/text-to-speech';
 
 // @ts-ignore
 import audioConcat from 'audioconcat';
@@ -13,6 +14,7 @@ import ConfigData from '../setupWizard/ConfigDataInterface';
 import ForeignPhraseDefinitionPair from './ForeignPhraseDefinitionPairInterface';
 import { translationDirection, voiceGender, audioEncoding } from '../../helpers/minorTypes';
 import WordFile, { contentTypes } from './WordFile';
+import AudioRequest from './AudioRequestInterface';
 
 import {
   audioParentFolderPath, silenceFolderPath, oneSecondPause, twoSecondPause,
@@ -20,13 +22,17 @@ import {
 } from '../../globals';
 
 import {
-  parseFileContents, isDone, fetchAndWriteAudio, createAudioRequest,
+  parseFileContents, isDone, createAudioRequest,
   setAudioOrderFromWordFileObjects, calculateMainPauseDuration,
 } from '../../helpers/AudioMakerHelpers';
 
 const { Translate } = require('@google-cloud/translate').v2;
 const { TranslationServiceClient } = require('@google-cloud/translate');
 
+const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
+const ffmpeg = require('fluent-ffmpeg');
+
+ffmpeg.setFfmpegPath(ffmpegPath);
 require('dotenv').config();
 
 // --------------- Main Class
@@ -85,8 +91,8 @@ export default class AudioMaker {
     const englishAudioName = `${prefix} - ${this.sentence.folderName}.ogg`;
     const englishAudioTempPath = path.join(tempFolder, englishAudioName);
 
-    fetchAndWriteAudio(foreignAudioRequest, foreignAudioTempPath);
-    fetchAndWriteAudio(englishAudioRequest, englishAudioTempPath);
+    this.fetchAndWriteAudio(foreignAudioRequest, foreignAudioTempPath);
+    this.fetchAndWriteAudio(englishAudioRequest, englishAudioTempPath);
 
     /** ** Add Pause *** */
     const mainPauseDuration: number = calculateMainPauseDuration(this.sentence.foreignWordCount);
@@ -179,6 +185,7 @@ export default class AudioMaker {
     wordPhraseOrSentence: string,
     direction: translationDirection,
   ) : Promise<string> {
+    console.log(`inside text translate for wps: ${wordPhraseOrSentence}`);
     const basicTranslate = new Translate({
       projectId: this.configData.projectId || process.env.GOOGLE_PROJECT_ID,
       keyFilename: googleApiKeyFilePath,
@@ -205,6 +212,27 @@ export default class AudioMaker {
     } catch (error) {
       throw new Error(error);
     }
+  }
+
+  /*
+    send a text-to-speech request
+    catches the audio stream. Saves to file
+ */
+  protected async fetchAndWriteAudio(
+    request: Readonly<AudioRequest>,
+    fileNameAndPath: string,
+  ) : Promise<ReturnType<typeof TextToSpeechClient.prototype.synthesizeSpeech>> {
+    const textToSpeech = new TextToSpeechClient({
+      keyFilename: googleApiKeyFilePath,
+      projectId: this.configData.projectId || process.env.GOOGLE_PROJECT_ID,
+    });
+
+    const writeFileAsync = util.promisify(writeFile);
+
+    try {
+      const [audioResponse] = await textToSpeech.synthesizeSpeech(request);
+      await writeFileAsync(fileNameAndPath, audioResponse.audioContent!);
+    } catch (error) { console.log(error); }
   }
 
   /*
@@ -311,8 +339,8 @@ export default class AudioMaker {
 
       /** ** Translate and save *** */
       for (let i = 1; i <= this.configData.numberOfRepeats; i += 1) {
-        fetchAndWriteAudio(foreignAudioRequest, foreignWordFullPath);
-        fetchAndWriteAudio(englishAudioRequest, englishDefinitionFullPath);
+        this.fetchAndWriteAudio(foreignAudioRequest, foreignWordFullPath);
+        this.fetchAndWriteAudio(englishAudioRequest, englishDefinitionFullPath);
 
         pairNumber += 1;
       }
@@ -325,10 +353,8 @@ export default class AudioMaker {
       Pushes all gathered data to: this.sentence.foreignPhraseDefinitionPairs
    */
   protected async gatherAllForeignWordsAndDefinitionsFromUser() : Promise<void> {
-      enum sequentialAdjectives {
-         first = 'first'
-         , next = 'next'
-      }
+      enum sequentialAdjectives { first = 'first', next = 'next' }
+
       let sequentialAdjective: sequentialAdjectives = sequentialAdjectives.first;
       let continueLooping: boolean = true;
 
@@ -337,15 +363,18 @@ export default class AudioMaker {
       );
 
       while (continueLooping) {
-        console.log(`Current Sentence, ENGLISH: ${this.sentence.englishVersion}`);
+        console.log(`
+Current Sentence, ENGLISH: ${this.sentence.englishVersion}`);
         console.log(`Current Sentence, FOREIGN: ${sentenceInForeignLanguage}`);
 
-        console.log(`Please enter the ${sequentialAdjective} foreign language word and press ENTER.`);
+        console.log(`
+Please enter the ${sequentialAdjective} foreign language word and press ENTER.
+`);
 
         if (sequentialAdjective === sequentialAdjectives.next) {
           console.log('Or type "--done" or "-d" (no quotes) to complete word definitions for this sentence.');
         }
-        console.log('sequentialAdjective', sequentialAdjective);
+
         const foreignWordUserInput: string = readLine.question();
 
         if (sequentialAdjective === sequentialAdjectives.first) {

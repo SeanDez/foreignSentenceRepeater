@@ -1,2 +1,1 @@
-this is the first sentence.
-second sentence line is here
+my name is Sean

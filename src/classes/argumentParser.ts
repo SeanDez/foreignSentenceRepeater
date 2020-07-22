@@ -72,6 +72,7 @@ export default class ArgumentParser {
         // buildOverview.prompt();
 
         // runs build process on all qualified sentences
+        // void promises are used to block sync code in following lines
         const cycles: Promise<void>[] = buildOrchestrator.qualifiedSentences.map(
           async (sentence: Sentence) => {
             const folderExists: boolean = checkForExistingFolder(sentence);

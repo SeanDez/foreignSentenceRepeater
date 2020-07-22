@@ -1,14 +1,13 @@
 import fs, { writeFile } from 'fs';
 import path from 'path';
 import util from 'util';
-import { TextToSpeechClient } from '@google-cloud/text-to-speech';
 
 import { voiceGender, audioEncoding } from './minorTypes';
 import AudioRequest from '../classes/sentenceBuilder/AudioRequestInterface';
 
 import {
   audioParentFolderPath, silenceFolderPath, oneSecondPause, twoSecondPause,
-  threeSecondPause, fourSecondPause, fiveSecondPause,
+  threeSecondPause, fourSecondPause, fiveSecondPause, googleApiKeyFilePath,
 } from '../globals';
 
 import WordFile from '../classes/sentenceBuilder/WordFile';
@@ -57,23 +56,6 @@ export function isDone(userInput: string): boolean {
   }
 
   return false;
-}
-
-/*
-    send a text-to-speech request
-    catches the audio stream. Saves to file
- */
-export async function fetchAndWriteAudio(
-  request: Readonly<AudioRequest>,
-  fileNameAndPath: string,
-) : Promise<ReturnType<typeof TextToSpeechClient.prototype.synthesizeSpeech>> {
-  const textToSpeech = new TextToSpeechClient();
-  const writeFileAsync = util.promisify(writeFile);
-
-  try {
-    const [audioResponse] = await textToSpeech.synthesizeSpeech(request);
-    await writeFileAsync(fileNameAndPath, audioResponse.audioContent!);
-  } catch (error) { console.log(error); }
 }
 
 export function setAudioOrderFromWordFileObjects(wordFiles: Array<WordFile>): Array<string> {
