@@ -22,7 +22,7 @@ export default class ArgumentParser {
 
   // ---------------  Helpers
 
-  public parse() {
+  public async parse() {
     // look for a flag in position 1
     // first two args are always "node" and {path}
     const arg1 = this.commandLineArgs[2];
@@ -72,23 +72,19 @@ export default class ArgumentParser {
         // buildOverview.prompt();
 
         // runs build process on all qualified sentences
-        // void promises are used to block sync code in following lines
-        const cycles: Promise<void>[] = buildOrchestrator.qualifiedSentences.map(
-          async (sentence: Sentence) => {
-            const folderExists: boolean = checkForExistingFolder(sentence);
+        /* eslint-disable no-restricted-syntax */
+        for (const sentence of buildOrchestrator.qualifiedSentences) {
+          const folderExists: boolean = checkForExistingFolder(sentence as Sentence);
 
-            if (folderExists === false) {
-              await buildOrchestrator.makeFolderAndAudioFiles(sentence);
-            }
-          },
-        );
+          /* eslint-disable no-await-in-loop */
+          if (folderExists === false) {
+            await buildOrchestrator.makeFolderAndAudioFiles(sentence as Sentence);
+          }
+        }
 
-        Promise.all(cycles)
-          .then(() => {
-            console.log(`Your foreign audio course has been built in the "/audioCourse" subfolder of the project root. Happy learning! 
+        console.log(`Your foreign audio course has been built in the "/audioCourse" subfolder of the project root. Happy learning! 
 
 PS: You can add more sentences or phrases to "sentences.txt" at any time, and rerun the build process to add more practice audios to your course.`);
-          });
 
         break;
       }
