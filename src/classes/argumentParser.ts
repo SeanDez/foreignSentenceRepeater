@@ -72,17 +72,22 @@ export default class ArgumentParser {
         // buildOverview.prompt();
 
         // runs build process on all qualified sentences
-        buildOrchestrator.qualifiedSentences.forEach(async (sentence: Sentence) => {
-          const folderExists: boolean = checkForExistingFolder(sentence);
+        const cycles: Promise<void>[] = buildOrchestrator.qualifiedSentences.map(
+          async (sentence: Sentence) => {
+            const folderExists: boolean = checkForExistingFolder(sentence);
 
-          if (folderExists === false) {
-            await buildOrchestrator.makeFolderAndAudioFiles(sentence);
-          }
-        });
+            if (folderExists === false) {
+              await buildOrchestrator.makeFolderAndAudioFiles(sentence);
+            }
+          },
+        );
 
-        console.log(`Your foreign audio course has been built in the "/audioCourse" subfolder of the project root. Happy learning! 
+        Promise.all(cycles)
+          .then(() => {
+            console.log(`Your foreign audio course has been built in the "/audioCourse" subfolder of the project root. Happy learning! 
 
 PS: You can add more sentences or phrases to "sentences.txt" at any time, and rerun the build process to add more practice audios to your course.`);
+          });
 
         break;
       }

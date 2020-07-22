@@ -75,7 +75,9 @@ export default class BuildOrchestrator {
      console.log('about to make sentence folder....');
      audioMaker.makeSentenceFolder();
 
+     console.log('before the first await');
      await audioMaker.makeWordAudioFiles();
+     console.log('after the first await');
 
      // make first sentence track
      const leadSentencePrefix = '1';
