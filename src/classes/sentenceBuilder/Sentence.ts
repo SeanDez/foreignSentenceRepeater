@@ -14,6 +14,12 @@ export function stripNonWordFolderCharacters(sentence: string): string {
   return updatedSentence;
 }
 
+function countWords(sentence: string) {
+  const words = sentence.split(' ');
+
+  return words.length;
+}
+
 // --------------- Main Class
 
 export default class Sentence {
@@ -25,6 +31,8 @@ export default class Sentence {
 
    public foreignPhraseDefinitionPairs: ForeignPhraseDefinitionPair[]= [];
 
+   public englishWordCount: number;
+
    public foreignWordCount: number = this.foreignPhraseDefinitionPairs.length;
 
    // --------------- Constructor
@@ -33,6 +41,7 @@ export default class Sentence {
    constructor(originalSentence: string) {
      this.englishVersion = originalSentence;
      this.folderName = this.buildFolderName();
+     this.englishWordCount = countWords(this.englishVersion);
    }
 
    // --------------- Internal methods

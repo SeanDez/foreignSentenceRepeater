@@ -33,7 +33,8 @@ export function calculateMainPauseDuration(wordCount: number)
   // word 1 gets 2 seconds automatically from the audio combiner.
   // this means all values are low by 2 seconds
   let pauseDuration = wordCount - 1;
-  if (pauseDuration > 12) pauseDuration = 12;
+  pauseDuration = Math.max(1, pauseDuration);
+  pauseDuration = Math.min(12, pauseDuration);
 
   return pauseDuration;
 }

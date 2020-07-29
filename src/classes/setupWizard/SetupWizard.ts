@@ -28,8 +28,6 @@ export default class SetupWizard {
 
     const configData = this.steps.reduce(
       (accumulator: Partial<ConfigData>, currentStepInstance: WizardSteps): Partial<ConfigData> => {
-        console.log('accumulator', accumulator);
-
         // instruct
         currentStepInstance.explain();
 

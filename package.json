@@ -45,6 +45,7 @@
     "ffmpeg": "0.0.4",
     "fluent-ffmpeg": "^2.1.2",
     "readline-sync": "^1.4.10",
+    "sox": "^0.1.0",
     "tmp": "^0.2.1"
   },
   "jest": {

@@ -95,7 +95,7 @@ export default class AudioMaker {
     this.fetchAndWriteAudio(englishAudioRequest, englishAudioTempPath);
 
     /** ** Add Pause *** */
-    const mainPauseDuration: number = calculateMainPauseDuration(this.sentence.foreignWordCount);
+    const mainPauseDuration: number = calculateMainPauseDuration(this.sentence.englishWordCount);
     const pauseFilePath = path.join(silenceFolderPath, `${mainPauseDuration}.ogg`);
 
     /** ** Setup final audio file structure *** */
@@ -142,11 +142,10 @@ export default class AudioMaker {
     /** ** Build Single Production File *** */
     const productionFileName = '2 - all words and definitions.ogg';
     const finalSaveFolderPath: string = path.join(audioParentFolderPath, this.sentence.folderName);
-    const fullSavePath = path.join(finalSaveFolderPath, productionFileName);
 
     this.combineAndSave(
       finalAudioOrder,
-      fullSavePath,
+      finalSaveFolderPath,
       { fullFileName: productionFileName },
     );
   }
@@ -300,22 +299,28 @@ export default class AudioMaker {
 
     audioConcat(audiosAndPauseFiles)
       .concat(finalFileSavePath)
-      .on('start', () => {
+      .on('start', (command: any) => {
         console.log(`ffmpeg build process started on file at: ${finalFileSavePath}`);
+        console.log('=====command=====');
+        console.log(command);
       })
       .on('end', () => {
         console.log(`Sucessfully created file at: ${finalFileSavePath}`);
       })
       .on('error', (error: any, stdout: any, stderr: any) => {
-        console.log('error', error);
-        console.log('stdout', stdout);
-        console.log('stderr', stderr);
+        console.log('=====error=====');
+        console.log(error);
+        console.log('=====stdout=====', stdout);
+        console.log(stdout);
+        console.log('=====stderr=====');
+        console.log(stderr);
       });
   }
 
   protected buildWordDefinitionAudiosToTempFolder(
     tempFolder: string,
   ) : void {
+    console.log('inside buildWordDefinitionAudiosToTempFolder');
     let pairNumber: number = 1;
 
     this.sentence.foreignPhraseDefinitionPairs.forEach((wordDefinitionPair) => {
@@ -339,6 +344,7 @@ export default class AudioMaker {
 
       /** ** Translate and save *** */
       for (let i = 1; i <= this.configData.numberOfRepeats; i += 1) {
+        console.log('attempt to write file to englishDefinitionFullPath', englishDefinitionFullPath);
         this.fetchAndWriteAudio(foreignAudioRequest, foreignWordFullPath);
         this.fetchAndWriteAudio(englishAudioRequest, englishDefinitionFullPath);
 

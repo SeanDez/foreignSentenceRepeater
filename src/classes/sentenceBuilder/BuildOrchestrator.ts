@@ -79,6 +79,7 @@ export default class BuildOrchestrator {
      await audioMaker.makeWordAudioFiles();
      console.log('after the first await');
 
+     /*
      // make first sentence track
      const leadSentencePrefix = '1';
      await audioMaker.makeSentenceTrack(leadSentencePrefix);
@@ -86,6 +87,7 @@ export default class BuildOrchestrator {
      // make the final reinforcement sentence
      const repeatSentenceFileName = '3-repeat-sentence.ogg:';
      audioMaker.duplicateTrack(leadSentencePrefix, repeatSentenceFileName);
+     */
    }
 
    public printCountOfValidSentences(): void {
