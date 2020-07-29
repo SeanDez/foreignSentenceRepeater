@@ -34,7 +34,6 @@ export default class SetupWizard {
         // loop until a valid input is returned
         // exit code is also handled
         const validatedUserInput: string = this.getValidInput(currentStepInstance);
-        console.log('validatedUserInput', validatedUserInput);
 
         // blocks until valid file is found, on file validation steps
         if (currentStepInstance.needsFileValidation && currentStepInstance.validateFile) {
@@ -61,7 +60,6 @@ export default class SetupWizard {
       }, {},
     ) as ConfigData; // assert return type on .reduce()
 
-    console.log('full object: configData', configData);
     return configData;
   }
 
