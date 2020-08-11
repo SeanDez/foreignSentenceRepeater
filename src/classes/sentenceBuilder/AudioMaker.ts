@@ -42,6 +42,7 @@ export default class AudioMaker {
   constructor(
      private configData: Readonly<ConfigData>,
      private sentence: Sentence,
+     private filePrefix: number = 1,
   ) {
     this.configData = configData;
     this.sentence = sentence;
@@ -61,7 +62,7 @@ export default class AudioMaker {
   /*
       Makes an audio of the sentence, in the sentence's subfolder
   */
-  public async makeSentenceTrack(prefix: string): Promise<void> {
+  public async makeSentenceTrack(): Promise<void> {
     /** ** Setup Audio Options *** */
     let foreignSentenceText;
     try {
@@ -85,10 +86,10 @@ export default class AudioMaker {
     /** ** Create 1st sentence audio *** */
     const tempFolder: string = tmp.dirSync({ unsafeCleanup: true }).name;
 
-    const foreignAudioName = `${prefix} - ${foreignSentenceText}.ogg`;
+    const foreignAudioName = `${this.filePrefix} - ${foreignSentenceText}.ogg`;
     const foreignAudioTempPath = path.join(`${tempFolder}`, foreignAudioName);
 
-    const englishAudioName = `${prefix} - ${this.sentence.folderName}.ogg`;
+    const englishAudioName = `${this.filePrefix} - ${this.sentence.folderName}.ogg`;
     const englishAudioTempPath = path.join(tempFolder, englishAudioName);
 
     this.fetchAndWriteAudio(foreignAudioRequest, foreignAudioTempPath);
@@ -359,71 +360,75 @@ export default class AudioMaker {
       Pushes all gathered data to: this.sentence.foreignPhraseDefinitionPairs
    */
   protected async gatherAllForeignWordsAndDefinitionsFromUser() : Promise<void> {
-      enum sequentialAdjectives { first = 'first', next = 'next' }
+    enum sequentialAdjectives { first = 'first', next = 'next' }
 
-      let sequentialAdjective: sequentialAdjectives = sequentialAdjectives.first;
-      let continueLooping: boolean = true;
+    let sequentialAdjective: sequentialAdjectives = sequentialAdjectives.first;
+    let continueLooping: boolean = true;
 
-      const sentenceInForeignLanguage: string = await this.textTranslate(
-        this.sentence.englishVersion, translationDirection.toForeign,
-      );
+    const sentenceInForeignLanguage: string = await this.textTranslate(
+      this.sentence.englishVersion, translationDirection.toForeign,
+    );
 
-      while (continueLooping) {
-        console.log(`
+    while (continueLooping) {
+      console.log(`
 Current Sentence, ENGLISH: ${this.sentence.englishVersion}`);
-        console.log(`Current Sentence, FOREIGN: ${sentenceInForeignLanguage}`);
+      console.log(`Current Sentence, FOREIGN: ${sentenceInForeignLanguage}`);
 
-        console.log(`
+      console.log(`
 Please enter the ${sequentialAdjective} foreign language word and press ENTER.
 `);
 
-        if (sequentialAdjective === sequentialAdjectives.next) {
-          console.log('Or type "--done" or "-d" (no quotes) to complete word definitions for this sentence.');
-        }
-
-        const foreignWordUserInput: string = readLine.question();
-
-        if (sequentialAdjective === sequentialAdjectives.first) {
-          sequentialAdjective = sequentialAdjectives.next;
-        }
-
-        /** ** Exit Check *** */
-        const userExited: boolean = isDone(foreignWordUserInput);
-        console.log('userExited', userExited);
-
-        if (userExited) {
-          continueLooping = false;
-          console.log('the userExited branch');
-        } else {
-          console.log('the else branch'); // it's like it stops working here
-
-          /** ** Fetch Google Translation *** */
-          /* eslint-disable no-await-in-loop */
-          const googleSuggestedTranslation: string = await this.textTranslate(
-            foreignWordUserInput, translationDirection.toEnglish,
-          );
-          console.log('googleSuggestedTranslation', googleSuggestedTranslation);
-
-          /** ** Ask user to accept, or override *** */
-          console.log(`The translation returned by Google for ${foreignWordUserInput} is: ${googleSuggestedTranslation}`);
-          console.log('Press ENTER (without entering any text) to accept this translation. Or, type your own custom definition, and press ENTER.');
-
-          const definitonUserInput = readLine.question();
-
-          let acceptedDefinition;
-          if (definitonUserInput === '') {
-            acceptedDefinition = googleSuggestedTranslation;
-          } else {
-            acceptedDefinition = definitonUserInput;
-          }
-
-          const wordDefinitionPair: ForeignPhraseDefinitionPair = {
-            foreignPhrase: foreignWordUserInput,
-            englishDefinition: acceptedDefinition,
-          };
-
-          this.sentence.foreignPhraseDefinitionPairs.push(wordDefinitionPair);
-        }
+      if (sequentialAdjective === sequentialAdjectives.next) {
+        console.log('Or type "--done" or "-d" (no quotes) to complete word definitions for this sentence.');
       }
+
+      const foreignWordUserInput: string = readLine.question();
+
+      if (sequentialAdjective === sequentialAdjectives.first) {
+        sequentialAdjective = sequentialAdjectives.next;
+      }
+
+      /** ** Exit Check *** */
+      const userExited: boolean = isDone(foreignWordUserInput);
+      console.log('userExited', userExited);
+
+      if (userExited) {
+        continueLooping = false;
+        console.log('the userExited branch');
+      } else {
+        console.log('the else branch'); // it's like it stops working here
+
+        /** ** Fetch Google Translation *** */
+        /* eslint-disable no-await-in-loop */
+        const googleSuggestedTranslation: string = await this.textTranslate(
+          foreignWordUserInput, translationDirection.toEnglish,
+        );
+        console.log('googleSuggestedTranslation', googleSuggestedTranslation);
+
+        /** ** Ask user to accept, or override *** */
+        console.log(`The translation returned by Google for ${foreignWordUserInput} is: ${googleSuggestedTranslation}`);
+        console.log('Press ENTER (without entering any text) to accept this translation. Or, type your own custom definition, and press ENTER.');
+
+        const definitonUserInput = readLine.question();
+
+        let acceptedDefinition;
+        if (definitonUserInput === '') {
+          acceptedDefinition = googleSuggestedTranslation;
+        } else {
+          acceptedDefinition = definitonUserInput;
+        }
+
+        const wordDefinitionPair: ForeignPhraseDefinitionPair = {
+          foreignPhrase: foreignWordUserInput,
+          englishDefinition: acceptedDefinition,
+        };
+
+        this.sentence.foreignPhraseDefinitionPairs.push(wordDefinitionPair);
+      }
+    }
+  }
+
+  private incrementFilePrefix(): void {
+    this.filePrefix += 1;
   }
 }

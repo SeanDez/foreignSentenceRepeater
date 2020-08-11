@@ -83,6 +83,7 @@ export default class SetupWizard {
       console.log(configStep.invalidInputMessage);
     }
 
+    // eslint-disable-next-line no-unreachable
     throw new Error('Should be unreachable');
   }
 
