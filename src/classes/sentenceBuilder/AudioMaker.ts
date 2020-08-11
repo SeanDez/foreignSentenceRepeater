@@ -5,9 +5,6 @@ import readLine from 'readline-sync';
 import tmp from 'tmp';
 import { TextToSpeechClient } from '@google-cloud/text-to-speech';
 
-// @ts-ignore
-import audioConcat from 'audioconcat';
-
 import Sentence from './Sentence';
 import Utilities from '../Utilities';
 import ConfigData from '../setupWizard/ConfigDataInterface';
@@ -27,12 +24,7 @@ import {
 } from '../../helpers/AudioMakerHelpers';
 
 const { Translate } = require('@google-cloud/translate').v2;
-const { TranslationServiceClient } = require('@google-cloud/translate');
 
-const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
-const ffmpeg = require('fluent-ffmpeg');
-
-ffmpeg.setFfmpegPath(ffmpegPath);
 require('dotenv').config();
 
 // --------------- Main Class
@@ -206,15 +198,15 @@ export default class AudioMaker {
       projectId: this.configData.projectId || process.env.GOOGLE_PROJECT_ID,
     });
 
-    const writeFileAsync = util.promisify(writeFile);
+    // const writeFileAsync = util.promisify(writeFile);
 
-    const fileNameAndPath = path.join(this.subfolderPath, fileName);
-    console.log('fileNameAndPath', fileNameAndPath);
+    // const fileNameAndPath = path.join(this.subfolderPath, fileName);
+    // console.log('fileNameAndPath', fileNameAndPath);
 
-    try {
-      const [audioResponse] = await textToSpeech.synthesizeSpeech(request);
-      await writeFileAsync(fileNameAndPath, audioResponse.audioContent!);
-    } catch (error) { console.log(error); }
+    // try {
+    //   const [audioResponse] = await textToSpeech.synthesizeSpeech(request);
+    //   await writeFileAsync(fileNameAndPath, audioResponse.audioContent!);
+    // } catch (error) { console.log(error); }
   }
 
   /*
@@ -279,25 +271,6 @@ export default class AudioMaker {
     } else {
       finalFileSavePath = path.join(savePath, fileNameOptions.fullFileName);
     }
-
-    audioConcat(audiosAndPauseFiles)
-      .concat(finalFileSavePath)
-      .on('start', (command: any) => {
-        console.log(`ffmpeg build process started on file at: ${finalFileSavePath}`);
-        console.log('=====command=====');
-        console.log(command);
-      })
-      .on('end', () => {
-        console.log(`Sucessfully created file at: ${finalFileSavePath}`);
-      })
-      .on('error', (error: any, stdout: any, stderr: any) => {
-        console.log('=====error=====');
-        console.log(error);
-        console.log('=====stdout=====', stdout);
-        console.log(stdout);
-        console.log('=====stderr=====');
-        console.log(stderr);
-      });
   }
 
   protected buildWordDefinitionAudiosToTempFolder(
