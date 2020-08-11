@@ -30,10 +30,8 @@ const sharedAudioRequestOptions = {
 */
 export function calculateMainPauseDuration(wordCount: number)
 : number {
-  // word 1 gets 2 seconds automatically from the audio combiner.
-  // this means all values are low by 2 seconds
-  let pauseDuration = wordCount - 1;
-  pauseDuration = Math.max(1, pauseDuration);
+  let pauseDuration = wordCount;
+  pauseDuration = Math.max(2, pauseDuration);
   pauseDuration = Math.min(12, pauseDuration);
 
   return pauseDuration;
@@ -96,8 +94,4 @@ export function createAudioRequest(
   };
 
   return audioRequest;
-}
-
-export function buildFileName(prefix: string, core: string, suffix: string) {
-  return `${prefix}-${core}-${suffix}`;
 }

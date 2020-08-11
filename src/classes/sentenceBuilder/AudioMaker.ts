@@ -23,7 +23,7 @@ import {
 
 import {
   parseFileContents, isDone, createAudioRequest,
-  setAudioOrderFromWordFileObjects, calculateMainPauseDuration, buildFileName,
+  setAudioOrderFromWordFileObjects, calculateMainPauseDuration,
 } from '../../helpers/AudioMakerHelpers';
 
 const { Translate } = require('@google-cloud/translate').v2;
@@ -62,7 +62,7 @@ export default class AudioMaker {
       Makes an audio of the sentence, in the sentence's subfolder
   */
   public async makeSentenceTrack(): Promise<void> {
-    /** ** Setup Audio Options *** */
+    // Setup Audio Options
     let foreignSentenceText;
     try {
       foreignSentenceText = await this.textTranslate(
@@ -82,33 +82,22 @@ export default class AudioMaker {
       'en', englishText, voiceGender.male,
     );
 
-    /** ** Create 1st sentence audio *** */
-    const foreignAudioName = `${this.filePrefix} - ${foreignSentenceText}.ogg`;
+    // Create english sentence audio
+    const englishAudioName = this.buildFileName([this.sentence.englishVersion, 'english']);
+    this.fetchAndWriteAudio(englishAudioRequest, englishAudioName);
+    this.incrementFilePrefix();
 
-    const englishAudioName = `${this.filePrefix} - ${this.sentence.folderName}.ogg`;
-
-    const finalSaveFolderPath: string = path.join(audioParentFolderPath, this.sentence.folderName);
-
-    this.fetchAndWriteAudio(foreignAudioRequest, finalSaveFolderPath);
-    // todo insert pause
-    // todo increment filename
-    this.fetchAndWriteAudio(englishAudioRequest, finalSaveFolderPath);
-
-    /** ** Add Pause *** */
+    // Add Pause
     const mainPauseDuration: number = calculateMainPauseDuration(this.sentence.englishWordCount);
-    const pauseFilePath = path.join(silenceFolderPath, `${mainPauseDuration}.ogg`);
+    const pauseFileSourcePath = path.join(silenceFolderPath, `${mainPauseDuration}.ogg`);
+    const destinationPauseFileName = this.buildFileName('silence');
+    const pauseDestinationPath = path.join(this.subfolderPath, destinationPauseFileName);
+    fs.copyFileSync(pauseFileSourcePath, pauseDestinationPath);
+    this.incrementFilePrefix();
 
-    /** ** Setup final audio file structure *** */
-    const singlePassStructure = [englishAudioTempPath, pauseFilePath,
-      foreignAudioTempPath, threeSecondPause];
-
-    const endStructure = singlePassStructure;
-    for (let i = 1; i <= this.configData.numberOfRepeats - 1; i += 1) {
-      const repeatStructure = [englishAudioTempPath, twoSecondPause,
-        foreignAudioTempPath, threeSecondPause];
-
-      endStructure.concat(repeatStructure);
-    }
+    // Create foreign sentence audio
+    const foreignAudioName = this.buildFileName([this.sentence.englishVersion, 'foreign']);
+    this.fetchAndWriteAudio(foreignAudioRequest, foreignAudioName);
   }
 
   public async makeWordAudioFiles(): Promise<void> {
@@ -210,7 +199,7 @@ export default class AudioMaker {
  */
   protected async fetchAndWriteAudio(
     request: Readonly<AudioRequest>,
-    fileNameAndPath: string,
+    fileName: string,
   ) : Promise<ReturnType<typeof TextToSpeechClient.prototype.synthesizeSpeech>> {
     const textToSpeech = new TextToSpeechClient({
       keyFilename: googleApiKeyFilePath,
@@ -218,6 +207,9 @@ export default class AudioMaker {
     });
 
     const writeFileAsync = util.promisify(writeFile);
+
+    const fileNameAndPath = path.join(this.subfolderPath, fileName);
+    console.log('fileNameAndPath', fileNameAndPath);
 
     try {
       const [audioResponse] = await textToSpeech.synthesizeSpeech(request);
@@ -312,7 +304,6 @@ export default class AudioMaker {
     tempFolder: string,
   ) : void {
     console.log('inside buildWordDefinitionAudiosToTempFolder');
-    let pairNumber: number = 1;
 
     this.sentence.foreignPhraseDefinitionPairs.forEach((wordDefinitionPair) => {
       /** ** Setup request objects *** */
@@ -327,22 +318,22 @@ export default class AudioMaker {
       /** ** Setup file names & paths *** */
 
       // foreign words are assigned 1 in the second position. english words are assigned 2
-      const foreignWordFileName = `${pairNumber}1 - foreign word - ${wordDefinitionPair.englishDefinition}.ogg`;
-      const foreignWordFullPath = path.join(tempFolder, foreignWordFileName);
+      const foreignWordFileName = this.buildFileName([wordDefinitionPair.englishDefinition, 'foreign']);
 
-      const englishDefinitionFileName = `${pairNumber}2 - definition - ${wordDefinitionPair.englishDefinition}.ogg`;
-      const englishDefinitionFullPath = path.join(tempFolder, englishDefinitionFileName);
+      const foreignWordFullPath = path.join(this.subfolderPath, foreignWordFileName);
+
+      const englishDefinitionFileName = this.buildFileName([wordDefinitionPair.englishDefinition, 'english']);
+      const englishDefinitionFullPath = path.join(this.subfolderPath, englishDefinitionFileName);
 
       /** ** Translate and save *** */
       for (let i = 1; i <= this.configData.numberOfRepeats; i += 1) {
         console.log('attempt to write file to englishDefinitionFullPath', englishDefinitionFullPath);
         this.fetchAndWriteAudio(foreignAudioRequest, foreignWordFullPath);
+        this.incrementFilePrefix();
+
         this.fetchAndWriteAudio(englishAudioRequest, englishDefinitionFullPath);
-
-        pairNumber += 1;
+        this.incrementFilePrefix();
       }
-
-      pairNumber += 1;
     });
   }
 
@@ -420,5 +411,16 @@ Please enter the ${sequentialAdjective} foreign language word and press ENTER.
 
   private incrementFilePrefix(): void {
     this.filePrefix += 1;
+  }
+
+  private buildFileName(core: string | string[], suffix: string = '.ogg', prefix: number = this.filePrefix) {
+    let finalCore: string;
+    if (Array.isArray(core)) {
+      finalCore = core.join('-');
+    } else {
+      finalCore = core;
+    }
+
+    return `${prefix}-${finalCore}${suffix}`;
   }
 }
