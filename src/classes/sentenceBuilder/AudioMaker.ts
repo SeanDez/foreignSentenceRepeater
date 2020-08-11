@@ -38,12 +38,14 @@ require('dotenv').config();
 // --------------- Main Class
 
 export default class AudioMaker {
+  private filePrefix: number = 1;
+
+  private subfolderPath: string;
+
   // --------------- Constructor
   constructor(
      private configData: Readonly<ConfigData>,
      private sentence: Sentence,
-     private filePrefix: number = 1,
-     private subfolderPath: string,
   ) {
     this.configData = configData;
     this.sentence = sentence;
