@@ -97,3 +97,7 @@ export function createAudioRequest(
 
   return audioRequest;
 }
+
+export function buildFileName(prefix: string, core: string, suffix: string) {
+  return `${prefix}-${core}-${suffix}`;
+}

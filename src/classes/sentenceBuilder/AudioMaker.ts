@@ -23,7 +23,7 @@ import {
 
 import {
   parseFileContents, isDone, createAudioRequest,
-  setAudioOrderFromWordFileObjects, calculateMainPauseDuration,
+  setAudioOrderFromWordFileObjects, calculateMainPauseDuration, buildFileName,
 } from '../../helpers/AudioMakerHelpers';
 
 const { Translate } = require('@google-cloud/translate').v2;
@@ -43,20 +43,17 @@ export default class AudioMaker {
      private configData: Readonly<ConfigData>,
      private sentence: Sentence,
      private filePrefix: number = 1,
+     private subfolderPath: string,
   ) {
     this.configData = configData;
     this.sentence = sentence;
+    this.subfolderPath = path.join(audioParentFolderPath, this.sentence.folderName);
   }
 
   // --------------- Public Methods
 
-  public makeSentenceFolder(): string {
-    const subfolderPath = path.join(audioParentFolderPath, this.sentence.folderName);
-
-    fs.mkdirSync(subfolderPath);
-    console.log('subfolderPath', subfolderPath);
-
-    return subfolderPath;
+  public makeSentenceFolder(): void {
+    fs.mkdirSync(this.subfolderPath);
   }
 
   /*
@@ -84,16 +81,16 @@ export default class AudioMaker {
     );
 
     /** ** Create 1st sentence audio *** */
-    const tempFolder: string = tmp.dirSync({ unsafeCleanup: true }).name;
-
     const foreignAudioName = `${this.filePrefix} - ${foreignSentenceText}.ogg`;
-    const foreignAudioTempPath = path.join(`${tempFolder}`, foreignAudioName);
 
     const englishAudioName = `${this.filePrefix} - ${this.sentence.folderName}.ogg`;
-    const englishAudioTempPath = path.join(tempFolder, englishAudioName);
 
-    this.fetchAndWriteAudio(foreignAudioRequest, foreignAudioTempPath);
-    this.fetchAndWriteAudio(englishAudioRequest, englishAudioTempPath);
+    const finalSaveFolderPath: string = path.join(audioParentFolderPath, this.sentence.folderName);
+
+    this.fetchAndWriteAudio(foreignAudioRequest, finalSaveFolderPath);
+    // todo insert pause
+    // todo increment filename
+    this.fetchAndWriteAudio(englishAudioRequest, finalSaveFolderPath);
 
     /** ** Add Pause *** */
     const mainPauseDuration: number = calculateMainPauseDuration(this.sentence.englishWordCount);
@@ -110,15 +107,6 @@ export default class AudioMaker {
 
       endStructure.concat(repeatStructure);
     }
-
-    /** ** Save To Production Subfolder *** */
-    const finalSaveFolderPath: string = path.join(audioParentFolderPath, this.sentence.folderName);
-
-    this.combineAndSave(
-      endStructure,
-      finalSaveFolderPath,
-      { prefix },
-    );
   }
 
   public async makeWordAudioFiles(): Promise<void> {
