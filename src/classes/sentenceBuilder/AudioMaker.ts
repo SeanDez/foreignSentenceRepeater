@@ -5,9 +5,6 @@ import readLine from 'readline-sync';
 import tmp from 'tmp';
 import { TextToSpeechClient } from '@google-cloud/text-to-speech';
 
-// @ts-ignore
-import audioConcat from 'audioconcat';
-
 import Sentence from './Sentence';
 import Utilities from '../Utilities';
 import ConfigData from '../setupWizard/ConfigDataInterface';
@@ -297,24 +294,25 @@ export default class AudioMaker {
     } else {
       finalFileSavePath = path.join(savePath, fileNameOptions.fullFileName);
     }
-    audioConcat(audiosAndPauseFiles)
-      .concat(finalFileSavePath)
-      .on('start', (command: any) => {
-        console.log(`ffmpeg build process started on file at: ${finalFileSavePath}`);
-        console.log('=====command=====');
-        console.log(command);
-      })
-      .on('end', () => {
-        console.log(`Sucessfully created file at: ${finalFileSavePath}`);
-      })
-      .on('error', (error: any, stdout: any, stderr: any) => {
-        console.log('=====error=====');
-        console.log(error);
-        console.log('=====stdout=====', stdout);
-        console.log(stdout);
-        console.log('=====stderr=====');
-        console.log(stderr);
-      });
+  audiosAndPauseFiles
+    .reduce((result, inputItem) => result.addInput(inputItem), ffmpeg())
+    .on('start', (command: any) => {
+          console.log(`ffmpeg build process started on file at: ${finalFileSavePath}`);
+          console.log('=====command=====');
+          console.log(command);
+        })
+        .on('end', () => {
+          console.log(`Sucessfully created file at: ${finalFileSavePath}`);
+        })
+        .on('error', (error: any, stdout: any, stderr: any) => {
+          console.log('=====error=====');
+          console.log(error);
+          console.log('=====stdout=====', stdout);
+          console.log(stdout);
+          console.log('=====stderr=====');
+          console.log(stderr);
+        })
+    .mergeToFile(finalFileSavePath, '/home/test');
   }
 
   protected buildWordDefinitionAudiosToTempFolder(
