@@ -1,6 +1,6 @@
-import fs, { writeFile } from 'fs';
+import fs from 'fs';
 import path from 'path';
-import util from 'util';
+//import util from 'util';
 import readLine from 'readline-sync';
 import tmp from 'tmp';
 import { TextToSpeechClient } from '@google-cloud/text-to-speech';
@@ -53,7 +53,7 @@ export default class AudioMaker {
   public makeSentenceFolder(): string {
     const subfolderPath = path.join(audioParentFolderPath, this.sentence.folderName);
 
-    fs.mkdirSync(subfolderPath);
+    fs.mkdirSync(subfolderPath,{recursive:true});
     console.log('subfolderPath', subfolderPath);
 
     return subfolderPath;
@@ -92,8 +92,8 @@ export default class AudioMaker {
     const englishAudioName = `${this.filePrefix} - ${this.sentence.folderName}.ogg`;
     const englishAudioTempPath = path.join(tempFolder, englishAudioName);
 
-    this.fetchAndWriteAudio(foreignAudioRequest, foreignAudioTempPath);
-    this.fetchAndWriteAudio(englishAudioRequest, englishAudioTempPath);
+    await this.fetchAndWriteAudio(foreignAudioRequest, foreignAudioTempPath);
+    await this.fetchAndWriteAudio(englishAudioRequest, englishAudioTempPath);
 
     /** ** Add Pause *** */
     const mainPauseDuration: number = calculateMainPauseDuration(this.sentence.englishWordCount);
@@ -117,7 +117,7 @@ export default class AudioMaker {
     this.combineAndSave(
       endStructure,
       finalSaveFolderPath,
-      { prefix },
+      { prefix:this.filePrefix.toString() },
     );
   }
 
@@ -227,11 +227,11 @@ export default class AudioMaker {
       projectId: this.configData.projectId || process.env.GOOGLE_PROJECT_ID,
     });
 
-    const writeFileAsync = util.promisify(writeFile);
+    //const writeFileAsync = util.promisify(writeFile);
 
     try {
       const [audioResponse] = await textToSpeech.synthesizeSpeech(request);
-      await writeFileAsync(fileNameAndPath, audioResponse.audioContent!);
+      await fs.promises.writeFile(fileNameAndPath, audioResponse.audioContent!);
     } catch (error) { console.log(error); }
   }
 
@@ -297,7 +297,6 @@ export default class AudioMaker {
     } else {
       finalFileSavePath = path.join(savePath, fileNameOptions.fullFileName);
     }
-
     audioConcat(audiosAndPauseFiles)
       .concat(finalFileSavePath)
       .on('start', (command: any) => {
