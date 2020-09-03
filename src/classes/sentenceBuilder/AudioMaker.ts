@@ -125,7 +125,7 @@ export default class AudioMaker {
     /** ** Build word def audios to temp directory *** */
     const tempFolder: string = tmp.dirSync({ unsafeCleanup: true }).name;
 
-    this.buildWordDefinitionAudiosToTempFolder(tempFolder);
+    await this.buildWordDefinitionAudiosToTempFolder(tempFolder);
 
     const tempFileNames: Array<string> = fs.readdirSync(tempFolder);
 
@@ -133,10 +133,9 @@ export default class AudioMaker {
     const wordFileObjects: Array<WordFile> = tempFileNames.map(
       (fileName) => new WordFile(fileName, tempFolder),
     );
-
     /** ** Setup order of files to be combined, including silences *** */
     const finalAudioOrder: string[] = setAudioOrderFromWordFileObjects(wordFileObjects);
-
+    
     /** ** Build Single Production File *** */
     const productionFileName = '2 - all words and definitions.ogg';
     const finalSaveFolderPath: string = path.join(audioParentFolderPath, this.sentence.folderName);
@@ -315,42 +314,42 @@ export default class AudioMaker {
     .mergeToFile(finalFileSavePath, '/home/test');
   }
 
-  protected buildWordDefinitionAudiosToTempFolder(
+  protected async buildWordDefinitionAudiosToTempFolder(
     tempFolder: string,
-  ) : void {
+  ) : Promise<void> {
     console.log('inside buildWordDefinitionAudiosToTempFolder');
     let pairNumber: number = 1;
-
-    this.sentence.foreignPhraseDefinitionPairs.forEach((wordDefinitionPair) => {
+    const foreignPhrasePairs = this.sentence.foreignPhraseDefinitionPairs;
+    for(let j=0; j<foreignPhrasePairs.length; j++){
       /** ** Setup request objects *** */
       const foreignAudioRequest = createAudioRequest(
-        this.configData.languageCode, wordDefinitionPair.foreignPhrase, voiceGender.female,
+        this.configData.languageCode, foreignPhrasePairs[j].foreignPhrase, voiceGender.female,
       );
 
       const englishAudioRequest = createAudioRequest(
-        'en', wordDefinitionPair.englishDefinition, voiceGender.female,
+        'en', foreignPhrasePairs[j].englishDefinition, voiceGender.female,
       );
 
       /** ** Setup file names & paths *** */
 
       // foreign words are assigned 1 in the second position. english words are assigned 2
-      const foreignWordFileName = `${pairNumber}1 - foreign word - ${wordDefinitionPair.englishDefinition}.ogg`;
+      const foreignWordFileName = `${pairNumber}1 - foreign word - ${foreignPhrasePairs[j].englishDefinition}.ogg`;
       const foreignWordFullPath = path.join(tempFolder, foreignWordFileName);
 
-      const englishDefinitionFileName = `${pairNumber}2 - definition - ${wordDefinitionPair.englishDefinition}.ogg`;
+      const englishDefinitionFileName = `${pairNumber}2 - definition - ${foreignPhrasePairs[j].englishDefinition}.ogg`;
       const englishDefinitionFullPath = path.join(tempFolder, englishDefinitionFileName);
 
       /** ** Translate and save *** */
-      for (let i = 1; i <= this.configData.numberOfRepeats; i += 1) {
+      for(let i = 1; i <= Number(this.configData.numberOfRepeats); i += 1) {
         console.log('attempt to write file to englishDefinitionFullPath', englishDefinitionFullPath);
-        this.fetchAndWriteAudio(foreignAudioRequest, foreignWordFullPath);
-        this.fetchAndWriteAudio(englishAudioRequest, englishDefinitionFullPath);
+        await this.fetchAndWriteAudio(foreignAudioRequest, foreignWordFullPath);
+        await this.fetchAndWriteAudio(englishAudioRequest, englishDefinitionFullPath);
 
         pairNumber += 1;
       }
 
       pairNumber += 1;
-    });
+    }
   }
 
   /*

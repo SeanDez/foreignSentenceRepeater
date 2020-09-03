@@ -75,16 +75,13 @@ export default class BuildOrchestrator {
      console.log('about to make sentence folder....');
      audioMaker.makeSentenceFolder();
 
-     console.log('before the first await');
      await audioMaker.makeSentenceTrack();
-     console.log('after the first await');
-     /*
      await audioMaker.makeWordAudioFiles();
 
      // make the final reinforcement sentence
-     const repeatSentenceFileName = '3-repeat-sentence.ogg:';
-     audioMaker.duplicateTrack(leadSentencePrefix, repeatSentenceFileName);
-     */
+     //const repeatSentenceFileName = '3-repeat-sentence.ogg:';
+     //audioMaker.duplicateTrack(leadSentencePrefix, repeatSentenceFileName);
+     
    }
 
    public printCountOfValidSentences(): void {
