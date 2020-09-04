@@ -23,6 +23,7 @@ module.exports = {
     'no-undef': 0,
     'no-unused-vars': 0,
     'no-console': 0, // used heavily for CLIor offering suggestions from an API
+    'no-await-in-loop': 0,
   },
   settings: {
     'import/resolver': {

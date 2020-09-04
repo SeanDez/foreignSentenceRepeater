@@ -1,12 +1,9 @@
-import fs, { writeFile } from 'fs';
+import fs from 'fs';
 import path from 'path';
-import util from 'util';
 import readLine from 'readline-sync';
 import tmp from 'tmp';
 import { TextToSpeechClient } from '@google-cloud/text-to-speech';
-
-// @ts-ignore
-import audioConcat from 'audioconcat';
+import dotenv from 'dotenv';
 
 import Sentence from './Sentence';
 import Utilities from '../Utilities';
@@ -33,7 +30,8 @@ const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
 const ffmpeg = require('fluent-ffmpeg');
 
 ffmpeg.setFfmpegPath(ffmpegPath);
-require('dotenv').config();
+dotenv.config();
+tmp.setGracefulCleanup();
 
 // --------------- Main Class
 
@@ -53,7 +51,7 @@ export default class AudioMaker {
   public makeSentenceFolder(): string {
     const subfolderPath = path.join(audioParentFolderPath, this.sentence.folderName);
 
-    fs.mkdirSync(subfolderPath);
+    fs.mkdirSync(subfolderPath, { recursive: true });
     console.log('subfolderPath', subfolderPath);
 
     return subfolderPath;
@@ -92,8 +90,8 @@ export default class AudioMaker {
     const englishAudioName = `${this.filePrefix} - ${this.sentence.folderName}.ogg`;
     const englishAudioTempPath = path.join(tempFolder, englishAudioName);
 
-    this.fetchAndWriteAudio(foreignAudioRequest, foreignAudioTempPath);
-    this.fetchAndWriteAudio(englishAudioRequest, englishAudioTempPath);
+    await this.fetchAndWriteAudio(foreignAudioRequest, foreignAudioTempPath);
+    await this.fetchAndWriteAudio(englishAudioRequest, englishAudioTempPath);
 
     /** ** Add Pause *** */
     const mainPauseDuration: number = calculateMainPauseDuration(this.sentence.englishWordCount);
@@ -117,7 +115,7 @@ export default class AudioMaker {
     this.combineAndSave(
       endStructure,
       finalSaveFolderPath,
-      { prefix },
+      { prefix: this.filePrefix.toString() },
     );
   }
 
@@ -128,7 +126,7 @@ export default class AudioMaker {
     /** ** Build word def audios to temp directory *** */
     const tempFolder: string = tmp.dirSync({ unsafeCleanup: true }).name;
 
-    this.buildWordDefinitionAudiosToTempFolder(tempFolder);
+    await this.buildWordDefinitionAudiosToTempFolder(tempFolder);
 
     const tempFileNames: Array<string> = fs.readdirSync(tempFolder);
 
@@ -227,11 +225,9 @@ export default class AudioMaker {
       projectId: this.configData.projectId || process.env.GOOGLE_PROJECT_ID,
     });
 
-    const writeFileAsync = util.promisify(writeFile);
-
     try {
       const [audioResponse] = await textToSpeech.synthesizeSpeech(request);
-      await writeFileAsync(fileNameAndPath, audioResponse.audioContent!);
+      await fs.promises.writeFile(fileNameAndPath, audioResponse.audioContent!);
     } catch (error) { console.log(error); }
   }
 
@@ -298,8 +294,13 @@ export default class AudioMaker {
       finalFileSavePath = path.join(savePath, fileNameOptions.fullFileName);
     }
 
-    audioConcat(audiosAndPauseFiles)
-      .concat(finalFileSavePath)
+    // pass all audio file paths to fluent ffmpeg
+    const fluentFfmpeg = ffmpeg();
+    const allFilesAdded: ReturnType<typeof ffmpeg> = audiosAndPauseFiles.reduce(
+      (ffmObject, filePath) => ffmObject.addInput(filePath), fluentFfmpeg,
+    );
+
+    allFilesAdded
       .on('start', (command: any) => {
         console.log(`ffmpeg build process started on file at: ${finalFileSavePath}`);
         console.log('=====command=====');
@@ -316,44 +317,50 @@ export default class AudioMaker {
         console.log('=====stderr=====');
         console.log(stderr);
       });
+
+    const tmpFolder: string = tmp.dirSync({ unsafeCleanup: true }).name;
+    allFilesAdded.mergeToFile(finalFileSavePath, tmpFolder);
   }
 
-  protected buildWordDefinitionAudiosToTempFolder(
+  protected async buildWordDefinitionAudiosToTempFolder(
     tempFolder: string,
-  ) : void {
+  ) : Promise<void> {
     console.log('inside buildWordDefinitionAudiosToTempFolder');
     let pairNumber: number = 1;
 
-    this.sentence.foreignPhraseDefinitionPairs.forEach((wordDefinitionPair) => {
+    const foreignPhrasePairs = this.sentence.foreignPhraseDefinitionPairs;
+
+    for (let i = 0; i < foreignPhrasePairs.length; i += 1) {
       /** ** Setup request objects *** */
       const foreignAudioRequest = createAudioRequest(
-        this.configData.languageCode, wordDefinitionPair.foreignPhrase, voiceGender.female,
+        this.configData.languageCode, foreignPhrasePairs[i].foreignPhrase, voiceGender.female,
       );
 
       const englishAudioRequest = createAudioRequest(
-        'en', wordDefinitionPair.englishDefinition, voiceGender.female,
+        'en', foreignPhrasePairs[i].englishDefinition, voiceGender.female,
       );
 
       /** ** Setup file names & paths *** */
 
-      // foreign words are assigned 1 in the second position. english words are assigned 2
-      const foreignWordFileName = `${pairNumber}1 - foreign word - ${wordDefinitionPair.englishDefinition}.ogg`;
+      // foreign words are assigned 1 in the first position. english words are assigned 2
+      const foreignWordFileName = `${pairNumber}1 - foreign word - ${foreignPhrasePairs[i].englishDefinition}.ogg`;
       const foreignWordFullPath = path.join(tempFolder, foreignWordFileName);
 
-      const englishDefinitionFileName = `${pairNumber}2 - definition - ${wordDefinitionPair.englishDefinition}.ogg`;
+      const englishDefinitionFileName = `${pairNumber}2 - definition - ${foreignPhrasePairs[i].englishDefinition}.ogg`;
       const englishDefinitionFullPath = path.join(tempFolder, englishDefinitionFileName);
 
       /** ** Translate and save *** */
-      for (let i = 1; i <= this.configData.numberOfRepeats; i += 1) {
+      for (let j = 1; j <= Number(this.configData.numberOfRepeats); j += 1) {
         console.log('attempt to write file to englishDefinitionFullPath', englishDefinitionFullPath);
-        this.fetchAndWriteAudio(foreignAudioRequest, foreignWordFullPath);
-        this.fetchAndWriteAudio(englishAudioRequest, englishDefinitionFullPath);
+
+        await this.fetchAndWriteAudio(foreignAudioRequest, foreignWordFullPath);
+        await this.fetchAndWriteAudio(englishAudioRequest, englishDefinitionFullPath);
 
         pairNumber += 1;
       }
 
       pairNumber += 1;
-    });
+    }
   }
 
   /*

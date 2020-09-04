@@ -31,8 +31,8 @@ export default class WordFile {
      beforePausePadding: number = 0,
      afterPausePadding: number = 3,
    ) {
-     this.contentType = this.getContentTypeFromFileName();
      this.fileName = fileName;
+     this.contentType = this.getContentTypeFromFileName();
      this.folderPath = folderPath;
      this.middlePause = Math.ceil(middlePause);
      this.beforePausePadding = Math.ceil(beforePausePadding);

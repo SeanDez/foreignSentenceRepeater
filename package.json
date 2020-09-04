@@ -43,6 +43,7 @@
     "dotenv": "^8.2.0",
     "es6-promise": "^4.2.8",
     "ffmpeg": "0.0.4",
+    "ffprobe": "^1.1.0",
     "fluent-ffmpeg": "^2.1.2",
     "readline-sync": "^1.4.10",
     "sox": "^0.1.0",
