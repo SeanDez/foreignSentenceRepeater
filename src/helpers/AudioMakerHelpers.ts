@@ -71,7 +71,7 @@ export function setAudioOrderFromWordFileObjects(wordFiles: Array<WordFile>): Ar
 
     finalAudioStructure.push(wordFile.fullFilePath);
 
-    const hasEndingPause = wordFile.beforePausePadding > 0;
+    const hasEndingPause = wordFile.afterPausePadding > 0;
     if (hasEndingPause) {
       const endingPauseFile = path.join(silenceFolderPath, `${wordFile.afterPausePadding}.ogg`);
       finalAudioStructure.push(endingPauseFile);

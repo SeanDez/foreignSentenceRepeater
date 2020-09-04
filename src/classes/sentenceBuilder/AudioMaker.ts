@@ -3,7 +3,7 @@ import path from 'path';
 import readLine from 'readline-sync';
 import tmp from 'tmp';
 import { TextToSpeechClient } from '@google-cloud/text-to-speech';
-import dotenv from 'dotenv';
+import * as dotenv from 'dotenv';
 
 import Sentence from './Sentence';
 import Utilities from '../Utilities';
