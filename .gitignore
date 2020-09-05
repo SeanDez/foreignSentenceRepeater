@@ -2,3 +2,7 @@
 node_modules
 /compiled
 googleCredentials.json
+
+# exclude all folders in audioCourse except a folder-presevring file
+audioCourse/*
+!audioCourse/.gitkeep
