@@ -1,0 +1,128 @@
+[]Best Practices:
+
+    []There are various eslint issues, you can see when you will run "npm run fix:eslint"
+    []All Configuration files should be at one place or one folder for rasy access and  easy understanding
+    []All static hard coded Strings should be part of Configuration files.
+        eg: ../googleCredentials.json, ../audioCourse etc. inside global.ts
+    []Every file should have maximum 200-300 lines of code, for better readability and modularity in the code.
+    []Split a single method having more than 50 lines of code in to tw0 seperate method.
+    []all reusable methods and utility methods should be in seperate files
+    eg: AudioMakers.ts
+
+[]File Wise:
+=========================
+    []AudioMaker.ts:
+
+        [] Various unused imports should be removed from the file.
+            eg: oneSecondPause,fourSecondPause etc.
+        [] use import instead of require for importing packages.
+        [] unused requires packages should be removed
+        [] can do all the settings and initialization for a class inside constructor
+            ffmpeg.setFfmpegPath(ffmpegPath);
+            tmp.setGracefulCleanup();
+        [] is any specific reason behind making a private attribute of a class readonly? if not we can remove this
+            private configData: Readonly<ConfigData>
+        [] We can make filePrefix value as a configuration value as well, 
+            let us suppose in future, if we want to change it to 0(zero) or any other value, we can change from there
+            for me it seems to be a configuration.
+        [] instead of using path in global, we can use configuration strings there as global configuration 
+            and paths we can directly join in the AudioMaker.ts and AudioMakerHelpers.ts as it looks like most of the path we are not using
+            inside the file or even if we are using, In case, We want to make some paths resusable we can use another file where all
+            the folder and path related methods and varibales should be define. eg: AudioFolders.ts,
+            Also, MakeSentenceFolder can be createAudioFolder and it can be also part of that Audiofolder.ts.
+            By this means we can also minimize the responsiblity a single file has whose purpose is to create audio files. 
+        [] "isDone" inside AudioMakersHelper.ts file should be more descriptive to define its purpose to increase readability of the code
+        [] file extensions eg:.ogg and language code: 'en' should be part of global configuration. in case in future if we need to change
+           file extensions to .mp3 or .wav, we can change from one place at a time. this will make them less error prone
+           so let us suppose if we change .ogg at some place mp3 and some place it is .ogg. if it is a part of global configuration
+           we can change from there.
+        [] these section of codes can be change to seperate methods and can be self explanatory instead of comments
+            eg:  
+            /** ** Setup Audio Options *** */ - setUpAudioOptions()
+            /** ** Create 1st sentence audio *** */ - createFirstSentenceAudio()
+            etc.
+            By this way a single method will not have to much line of code and responsibility.
+            Code will be more readable and easily understandable.
+
+            [] setUpAudioOptions() -  it can be part of AudioMakerHelpers class.
+        [] this is equivalent to "i <= this.configData.numberOfRepeats - 1" to "i < this.configData.numberOfRepeats", avoid adding extra (-1)
+            also i+=1 can be i++; or ++i
+            We can use while loop as well for these cases
+        [] the code line no 101-110 is unnecessarily using two const variables and its only one array can be used by repeatStructure
+            using spread operator:
+            eg: the below two lines can be one line: also somehow we should try to use single array having common values
+            const singlePassStructure = [englishAudioTempPath, pauseFilePath,
+                                          foreignAudioTempPath, threeSecondPause];
+            const endStructure = singlePassStructure; 
+
+            can be:
+            const endStructure = [englishAudioTempPath, pauseFilePath,
+                              foreignAudioTempPath, threeSecondPause]
+        [] Inside method:makeWordAudioFiles(), we can make below string in configuration files so that in future we have to change name we can do easily from one place
+            const productionFileName = '2 - all words and definitions.ogg';
+        [] Below is a constant temporary directory and used at several places can be defined at one place.(less code, more readability)
+            const tempFolder: string = tmp.dirSync({ unsafeCleanup: true }).name
+        [] gatherAllForeignWordsAndDefinitionsFromUser() can be split in to two seperate methods as more than 50 lines of code
+        [] Use constant as CAPS Letter for the sake of naming conventions and here below unnecessary use of similar string constant in
+            enum sequentialAdjectives { first = 'first', next = 'next' }
+            can be simply:
+                enum sequentialAdjectives { FIRST , NEXT }
+                console.log(sequentialAdjectives[1].toLowerCase())
+        [] delete various console.log() methods
+        [] this method can be used directly in to method, below is unnecessary increasing one extra line:
+             const userExited: boolean = isDone(foreignWordUserInput);
+             console.log('userExited', userExited);
+            if (userExited) {
+                continueLooping = false;
+                console.log('the userExited branch');
+            } else {
+                console.log('the else branch'); // it's like it stops working here
+
+            above 6 line can be simply a one liner while(!isDone(foreignWordUserInput)) in the while loop itself
+        [] below can be a one liner: (less code, less confusion, for better readability)
+                let acceptedDefinition;
+                if (definitonUserInput === '') {
+                acceptedDefinition = googleSuggestedTranslation;
+                } else {
+                acceptedDefinition = definitonUserInput;
+                }
+
+                const wordDefinitionPair: ForeignPhraseDefinitionPair = {
+                foreignPhrase: foreignWordUserInput,
+                englishDefinition: acceptedDefinition,
+                };
+
+                can be:
+
+                const wordDefinitionPair: ForeignPhraseDefinitionPair = {
+                foreignPhrase: foreignWordUserInput,
+                englishDefinition: definitonUserInput === ''? googleSuggestedTranslation : definitonUserInput;
+                };
+
+               [] even the last line wordDefinitionPair can be also replaced by above Object itslef:
+                
+                this.sentence.foreignPhraseDefinitionPairs.push(wordDefinitionPair);
+                
+                can be:
+
+                this.sentence.foreignPhraseDefinitionPairs.push({
+                foreignPhrase: foreignWordUserInput,
+                englishDefinition: definitonUserInput === ''? googleSuggestedTranslation : definitonUserInput;
+                });
+
+    [] incrementFilePrefix() method is not required and unused and can be removed.
+    =====================
+    []AudioRequestInterface.ts:
+        [] move all the string literals to global configuration file.
+        [] avoid providing default value inside, inerface declaration - Not a good practice
+        [] below should be:
+            audioEncoding : 'AUDIO_ENCODING_UNSPECIFIED' | 'LINEAR16' | 'MP3' | 'OGG_OPUS'
+            audioEncoding : string
+    []BuildOrchestrator.ts:
+        [] In Progress
+    []ForeignPhraseDefinitionPairInterface.ts
+        [] In Progress
+    []Sentence.ts
+        [] In Progress
+    []WordFile.ts
+        [] In Progress       
