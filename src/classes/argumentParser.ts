@@ -3,7 +3,7 @@ import SetupFinalizer from './setupWizard/SetupFinalizer';
 
 // step instances
 import ConfigOverview from './setupWizard/ConfigOverview';
-import InstallSox from './setupWizard/InstallSox';
+import InstallFFMpeg from './setupWizard/InstallFFMpeg';
 import SetupRole from './setupWizard/SetupRole';
 import SetupProjectID from './setupWizard/SetupProjectID';
 import EnableApis from './setupWizard/EnableApis';
@@ -33,7 +33,7 @@ export default class ArgumentParser {
         // run setup wizard
         const setupWizard: InstanceType<typeof SetupWizard> = new SetupWizard([
           new ConfigOverview(),
-          new InstallSox(),
+          new InstallFFMpeg(),
           new SetupRole(),
           new SetupProjectID(),
           new EnableApis(),
